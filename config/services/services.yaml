@@ -1,0 +1,10 @@
+services:
+  SaaSFormation\Framework\Projects\UI\API\HTTP\ReactPHPBasedJSONResponder:
+
+  SaaSFormation\Framework\Projects\UI\API\HTTP\Endpoint:
+    public: true
+    arguments:
+      $defaultResponseContentType: "application/json"
+      $logger: '@default_logger'
+      $responders:
+        - '@SaaSFormation\Framework\Projects\UI\API\HTTP\ReactPHPBasedJSONResponder'

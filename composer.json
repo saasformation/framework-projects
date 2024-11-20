@@ -1,0 +1,29 @@
+{
+    "name": "saasformation/framework-projects",
+    "type": "library",
+    "license": "MIT",
+    "authors": [
+        {
+            "name": "SaaSFormation",
+            "email": "info@saasformation.com"
+        }
+    ],
+    "autoload": {
+        "psr-4": {
+            "SaaSFormation\\Framework\\Projects\\": "src"
+        }
+    },
+    "require": {
+        "php": "^8.3",
+        "ext-pcntl": "*",
+        "saasformation/framework-contracts": "dev-main",
+        "saasformation/framework-env-vars-manager": "dev-main",
+        "symfony/dependency-injection": "^7",
+        "symfony/yaml": "^7",
+        "symfony/config": "^7",
+        "react/http": "^1.10",
+        "react/socket": "^1.16",
+        "league/route": "^6",
+        "monolog/monolog": "^3"
+    }
+}
