@@ -62,7 +62,7 @@ class APIKernel implements KernelInterface
     {
         try {
             $this->envVarsManager = $envVarsManagerProvider->provide();
-        } catch(\Exception $e) {
+        } catch(Throwable $e) {
             $this->defaultLogger->critical($e->getMessage());
             die();
         }
@@ -105,7 +105,7 @@ class APIKernel implements KernelInterface
 
         try {
             return $this->router->route($request);
-        } catch (\Exception $e) {
+        } catch (Throwable $e) {
             return $this->processError($request, $e);
         }
     }
