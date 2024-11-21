@@ -16,8 +16,8 @@
     "require": {
         "php": "^8.3",
         "ext-pcntl": "*",
-        "saasformation/framework-contracts": "dev-main",
-        "saasformation/framework-env-vars-manager": "dev-main",
+        "saasformation/framework-contracts": "0.1.0",
+        "saasformation/framework-env-vars-manager": "0.1.0",
         "symfony/dependency-injection": "^7",
         "symfony/yaml": "^7",
         "symfony/config": "^7",
