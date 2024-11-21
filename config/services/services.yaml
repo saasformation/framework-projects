@@ -71,7 +71,7 @@ services:
       $defaultResponseContentType: "application/json"
       $logger: '@default_logger'
       $commandBus: '@SaaSFormation\Framework\Projects\Infrastructure\Bus\TacticianBasedCommandBus'
-      $queryBus: '@SaaSFormation\Framework\Projects\Infrastructure\Bus\TacticianBasedCommandBus'
+      $queryBus: '@SaaSFormation\Framework\Projects\Infrastructure\Bus\TacticianBasedQueryBus'
       $responders:
         - '@SaaSFormation\Framework\Projects\UI\API\HTTP\ReactPHPBasedJSONResponder'
 
