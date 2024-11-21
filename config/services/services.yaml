@@ -6,13 +6,13 @@ services:
   tactician_command_bus_logger_middleware:
     class: League\Tactician\Logger\LoggerMiddleware
     arguments:
-      $formatter: SaaSFormation\Framework\Projects\Infrastructure\Bus\TacticianCommandBusLogFormatter
+      $formatter: '@SaaSFormation\Framework\Projects\Infrastructure\Bus\TacticianCommandBusLogFormatter'
       $logger: '@default_logger'
 
   tactician_query_bus_logger_middleware:
     class: League\Tactician\Logger\LoggerMiddleware
     arguments:
-      $formatter: SaaSFormation\Framework\Projects\Infrastructure\Bus\TacticianQueryBusLogFormatter
+      $formatter: '@SaaSFormation\Framework\Projects\Infrastructure\Bus\TacticianQueryBusLogFormatter'
       $logger: '@default_logger'
 
   League\Tactician\Handler\MethodNameInflector\HandleInflector:
