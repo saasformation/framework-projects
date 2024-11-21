@@ -20,6 +20,12 @@ services:
   League\Tactician\Handler\CommandNameExtractor\ClassNameExtractor:
 
   SaaSFormation\Framework\Projects\Infrastructure\Bus\TacticianCommandBusInterfaceBasedHandlerLocator:
+    arguments:
+      $container: '@service_container'
+
+  SaaSFormation\Framework\Projects\Infrastructure\Bus\TacticianQueryBusInterfaceBasedHandlerLocator:
+    arguments:
+      $container: '@service_container'
 
   tactician_commandbus_command_handler_middleware:
     class: League\Tactician\Handler\CommandHandlerMiddleware
