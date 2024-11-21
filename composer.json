@@ -24,6 +24,9 @@
         "react/http": "^1.10",
         "react/socket": "^1.16",
         "league/route": "^6",
-        "monolog/monolog": "^3"
+        "monolog/monolog": "^3",
+        "league/tactician": "^1",
+        "league/tactician-container": "^3",
+        "league/tactician-logger": "^0.11"
     }
 }
