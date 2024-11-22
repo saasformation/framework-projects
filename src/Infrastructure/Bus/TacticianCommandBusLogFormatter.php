@@ -15,7 +15,7 @@ class TacticianCommandBusLogFormatter implements Formatter
             throw new Exception('Command must be instance of CommandInterface');
         }
 
-        $logger->debug("Command {$command->name()} received");
+        $logger->debug("Command {$command->code()} received");
     }
 
     public function logCommandSucceeded(LoggerInterface $logger, $command, $returnValue)
@@ -24,7 +24,7 @@ class TacticianCommandBusLogFormatter implements Formatter
             throw new Exception('Command must be instance of CommandInterface');
         }
 
-        $logger->debug("Command {$command->name()} succeeded");
+        $logger->debug("Command {$command->code()} succeeded");
     }
 
     public function logCommandFailed(LoggerInterface $logger, $command, Exception $e)
@@ -33,7 +33,7 @@ class TacticianCommandBusLogFormatter implements Formatter
             throw new Exception('Command must be instance of CommandInterface');
         }
 
-        $logger->error("Command {$command->name()} failed", [
+        $logger->error("Command {$command->code()} failed", [
             'error' => [
                 'file' => $e->getFile(),
                 'line' => $e->getLine(),
