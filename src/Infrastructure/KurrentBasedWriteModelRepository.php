@@ -7,6 +7,7 @@ use Psr\Log\LoggerInterface;
 use SaaSFormation\Framework\Contracts\Common\Identity\IdInterface;
 use SaaSFormation\Framework\Contracts\Domain\Aggregate;
 use SaaSFormation\Framework\Contracts\Domain\DomainEvent;
+use SaaSFormation\Framework\Contracts\Domain\DomainEventStream;
 use SaaSFormation\Framework\Contracts\Domain\WriteModelRepositoryInterface;
 
 readonly class KurrentBasedWriteModelRepository implements WriteModelRepositoryInterface
@@ -19,9 +20,7 @@ readonly class KurrentBasedWriteModelRepository implements WriteModelRepositoryI
     public function save(Aggregate $aggregate): void
     {
         $streamName = strtolower($aggregate->code()) . '-' . $aggregate->id()->humanReadable();
-        foreach ($aggregate->eventStream()->events() as $event) {
-            $this->pushEvent($streamName, $aggregate->id(), $event);
-        }
+        $this->pushEvents($streamName, $aggregate->id(), $aggregate->eventStream());
     }
 
     public function hasAggregate(IdInterface $id): bool
@@ -29,57 +28,52 @@ readonly class KurrentBasedWriteModelRepository implements WriteModelRepositoryI
         return true;
     }
 
-    public function pushEvent(string $streamName, IdInterface $aggregateId, DomainEvent $event): void
+    public function pushEvents(string $streamName, IdInterface $aggregateId, DomainEventStream $eventStream): void
     {
         try {
-            $this->logTryingToPush($aggregateId, $event);
+            $this->logTryingToPush($aggregateId);
+            $events = array_map(function (DomainEvent $event) {
+                return [
+                    "eventId" => $event->id()->humanReadable(),
+                    "eventType" => $event->code(),
+                    "data" => $event->toArray()
+                ];
+            }, $eventStream->events());
             $this->eventStoreClient->post("/streams/$streamName", [
                 'headers' => [
                     'content-type' => 'application/vnd.eventstore.events+json',
                 ],
-                'body' => json_encode([
-                    [
-                        "eventId" => $event->id()->humanReadable(),
-                        "eventType" => $event->code(),
-                        "data" => $event->toArray()
-                    ]
-                ])
+                'body' => json_encode($events),
             ]);
-            $this->logPushed($aggregateId, $event);
+            $this->logPushed($aggregateId);
         } catch (\Throwable $e) {
-            $this->logFailedToPush($e, $aggregateId, $event);
+            $this->logFailedToPush($e, $aggregateId);
             throw $e;
         }
     }
 
     /**
      * @param IdInterface $aggregateId
-     * @param DomainEvent $event
      * @return void
      */
-    public function logTryingToPush(IdInterface $aggregateId, DomainEvent $event): void
+    public function logTryingToPush(IdInterface $aggregateId): void
     {
-        $this->logger->debug("Trying to push domain event to the event store", [
+        $this->logger->debug("Trying to push domain events to the event store", [
             "data" => [
-                "aggregateId" => $aggregateId->humanReadable(),
-                "eventId" => $event->id()->humanReadable(),
-                "eventType" => $event->code()
+                "aggregateId" => $aggregateId->humanReadable()
             ]
         ]);
     }
 
     /**
      * @param IdInterface $aggregateId
-     * @param DomainEvent $event
      * @return void
      */
-    public function logPushed(IdInterface $aggregateId, DomainEvent $event): void
+    public function logPushed(IdInterface $aggregateId): void
     {
-        $this->logger->debug("Domain event pushed to the event store", [
+        $this->logger->debug("Domain events pushed to the event store", [
             "data" => [
-                "aggregateId" => $aggregateId->humanReadable(),
-                "eventId" => $event->id()->humanReadable(),
-                "eventType" => $event->code()
+                "aggregateId" => $aggregateId->humanReadable()
             ]
         ]);
     }
@@ -87,21 +81,18 @@ readonly class KurrentBasedWriteModelRepository implements WriteModelRepositoryI
     /**
      * @param \Throwable|\Exception $e
      * @param IdInterface $aggregateId
-     * @param DomainEvent $event
      * @return void
      */
-    public function logFailedToPush(\Throwable|\Exception $e, IdInterface $aggregateId, DomainEvent $event): void
+    public function logFailedToPush(\Throwable|\Exception $e, IdInterface $aggregateId): void
     {
-        $this->logger->error("Domain event failed to push to the event store", [
+        $this->logger->error("Domain events failed to push to the event store", [
             "error" => [
                 "message" => $e->getMessage(),
                 "file" => $e->getFile(),
                 "line" => $e->getLine(),
             ],
             "data" => [
-                "aggregateId" => $aggregateId->humanReadable(),
-                "eventId" => $event->id()->humanReadable(),
-                "eventType" => $event->code()
+                "aggregateId" => $aggregateId->humanReadable()
             ]
         ]);
     }
