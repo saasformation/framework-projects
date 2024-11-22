@@ -18,7 +18,7 @@ readonly class KurrentBasedWriteModelRepository implements WriteModelRepositoryI
 
     public function save(Aggregate $aggregate): void
     {
-        $streamName = 'aggregate-' . strtolower($aggregate->code()) . '-' . $aggregate->id()->humanReadable();
+        $streamName = strtolower($aggregate->code()) . '-' . $aggregate->id()->humanReadable();
         foreach ($aggregate->eventStream()->events() as $event) {
             $this->pushEvent($streamName, $aggregate->id(), $event);
         }
@@ -38,9 +38,11 @@ readonly class KurrentBasedWriteModelRepository implements WriteModelRepositoryI
                     'content-type' => 'application/vnd.eventstore.events+json',
                 ],
                 'body' => json_encode([
-                    "eventId" => $event->id()->humanReadable(),
-                    "eventType" => $event->code(),
-                    "data" => $event->toArray()
+                    [
+                        "eventId" => $event->id()->humanReadable(),
+                        "eventType" => $event->code(),
+                        "data" => $event->toArray()
+                    ]
                 ])
             ]);
             $this->logPushed($aggregateId, $event);
