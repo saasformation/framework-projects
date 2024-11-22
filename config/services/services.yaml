@@ -75,3 +75,7 @@ services:
       $responders:
         - '@SaaSFormation\Framework\Projects\UI\API\HTTP\ReactPHPBasedJSONResponder'
 
+  SaaSFormation\Framework\Projects\Infrastructure\Identity\RamseyBasedUUIDFactory:
+
+  Psr\Log\LoggerInterface: '@default_logger'
+  SaaSFormation\Framework\Contracts\Common\Identity\UUIDFactoryInterface: '@SaaSFormation\Framework\Projects\Infrastructure\Identity\RamseyBasedUUIDFactory'
