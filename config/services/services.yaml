@@ -31,9 +31,14 @@ services:
       $container: '@service_container'
       $logger: '@default_logger'
 
+  SaaSFormation\Framework\Projects\Infrastructure\EventDispatcher\EventDispatcher:
+    arguments:
+      $container: '@service_container'
+      $logger: '@default_logger'
+
   SaaSFormation\Framework\Projects\Infrastructure\Bus\CommandBusSendEventsToEventStreamMiddleware:
     arguments:
-      $eventBus: '@SaaSFormation\Framework\Projects\Infrastructure\Bus\TacticianBasedEventBus'
+      $eventDispatcher: '@SaaSFormation\Framework\Projects\Infrastructure\EventDispatcher\EventDispatcher'
       $commandNameExtractor: '@League\Tactician\Handler\CommandNameExtractor\ClassNameExtractor'
       $handlerLocator: '@SaaSFormation\Framework\Projects\Infrastructure\Bus\TacticianCommandBusInterfaceBasedHandlerLocator'
       $methodNameInflector: '@League\Tactician\Handler\MethodNameInflector\HandleInflector'
