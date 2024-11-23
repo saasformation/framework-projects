@@ -35,13 +35,17 @@ class EventDispatcher implements EventDispatcherInterface
                             $types = $event->getType()->getTypes();
                             foreach($types as $type) {
                                 if($type instanceof \ReflectionNamedType && $type->getName() !== DomainEvent::class) {
-                                    $reflectedType = new \ReflectionClass($type);
-                                    if($reflectedType->getParentClass() && $reflectedType->getParentClass()->getName() === DomainEvent::class) {
-                                        $code = $type->getName()::code();
-                                        if(is_string($code)) {
-                                            $this->map[$code][] = $service;
-                                            $this->logger->debug("Event handler $class for event with code $code has been registered");
+                                    if(class_exists($type->getName())) {
+                                        $reflectedType = new \ReflectionClass($type->getName());
+                                        if($reflectedType->getParentClass() && $reflectedType->getParentClass()->getName() === DomainEvent::class) {
+                                            $code = $type->getName()::code();
+                                            if(is_string($code)) {
+                                                $this->map[$code][] = $service;
+                                                $this->logger->debug("Event handler $class for event with code $code has been registered");
+                                            }
                                         }
+                                    } else {
+                                        throw new \Exception("Event type not found");
                                     }
                                 }
                             }
