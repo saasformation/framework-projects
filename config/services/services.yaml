@@ -30,14 +30,17 @@ services:
   SaaSFormation\Framework\Projects\Infrastructure\Bus\TacticianCommandBusInterfaceBasedHandlerLocator:
     arguments:
       $container: '@service_container'
+      $logger: '@default_logger'
 
   SaaSFormation\Framework\Projects\Infrastructure\Bus\TacticianQueryBusInterfaceBasedHandlerLocator:
     arguments:
       $container: '@service_container'
+      $logger: '@default_logger'
 
   SaaSFormation\Framework\Projects\Infrastructure\Bus\TacticianEventBusInterfaceBasedHandlerLocator:
     arguments:
       $container: '@service_container'
+      $logger: '@default_logger'
 
   tactician_commandbus_command_handler_middleware:
     class: League\Tactician\Handler\CommandHandlerMiddleware

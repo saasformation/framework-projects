@@ -4,6 +4,7 @@ namespace SaaSFormation\Framework\Projects\Infrastructure\Bus;
 
 use League\Tactician\Handler\Locator\HandlerLocator;
 use Psr\Container\ContainerInterface;
+use Psr\Log\LoggerInterface;
 use SaaSFormation\Framework\Contracts\Application\Bus\CommandHandlerInterface;
 
 class TacticianCommandBusInterfaceBasedHandlerLocator implements HandlerLocator
@@ -11,7 +12,7 @@ class TacticianCommandBusInterfaceBasedHandlerLocator implements HandlerLocator
     /** @var array<string, object> */
     private array $map;
 
-    public function __construct(private readonly ContainerInterface $container)
+    public function __construct(private readonly ContainerInterface $container, private readonly LoggerInterface $logger)
     {
         $this->map = [];
 
@@ -25,7 +26,9 @@ class TacticianCommandBusInterfaceBasedHandlerLocator implements HandlerLocator
                     if(!is_object($service)) {
                         throw new \Exception("Container returned a non object for a known service $class");
                     }
-                    $this->map[str_replace('Handler', '', $class)] = $service;
+                    $commandName = str_replace('Handler', '', $class);
+                    $this->map[$commandName] = $service;
+                    $this->logger->debug("Command handler $class for command $commandName has been registered");
                 } else {
                     throw new \Exception("Handler service '$class' not found in the container");
                 }
