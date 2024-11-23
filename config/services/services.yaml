@@ -42,6 +42,13 @@ services:
       $container: '@service_container'
       $logger: '@default_logger'
 
+  SaaSFormation\Framework\Projects\Infrastructure\Bus\CommandBusSendEventsToEventStreamMiddleware:
+    arguments:
+      $eventBus: '@SaaSFormation\Framework\Projects\Infrastructure\Bus\TacticianBasedEventBus'
+      $commandNameExtractor: '@League\Tactician\Handler\CommandNameExtractor\ClassNameExtractor'
+      $handlerLocator: '@SaaSFormation\Framework\Projects\Infrastructure\Bus\TacticianCommandBusInterfaceBasedHandlerLocator'
+      $methodNameInflector: '@League\Tactician\Handler\MethodNameInflector\HandleInflector'
+
   tactician_querybus_command_handler_middleware:
     class: League\Tactician\Handler\CommandHandlerMiddleware
     arguments:
@@ -52,13 +59,6 @@ services:
   tactician_eventbus_command_handler_middleware:
     class: League\Tactician\Handler\CommandHandlerMiddleware
     arguments:
-      $commandNameExtractor: '@League\Tactician\Handler\CommandNameExtractor\ClassNameExtractor'
-      $handlerLocator: '@SaaSFormation\Framework\Projects\Infrastructure\Bus\TacticianEventBusInterfaceBasedHandlerLocator'
-      $methodNameInflector: '@League\Tactician\Handler\MethodNameInflector\HandleInflector'
-
-  SaaSFormation\Framework\Projects\Infrastructure\Bus\CommandBusSendEventsToEventStreamMiddleware:
-    arguments:
-      $eventBus: '@SaaSFormation\Framework\Projects\Infrastructure\Bus\TacticianBasedEventBus'
       $commandNameExtractor: '@League\Tactician\Handler\CommandNameExtractor\ClassNameExtractor'
       $handlerLocator: '@SaaSFormation\Framework\Projects\Infrastructure\Bus\TacticianEventBusInterfaceBasedHandlerLocator'
       $methodNameInflector: '@League\Tactician\Handler\MethodNameInflector\HandleInflector'
