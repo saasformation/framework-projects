@@ -49,8 +49,10 @@ class EventDispatcher implements EventDispatcherInterface
 
     public function dispatch(DomainEvent $event): void
     {
-        foreach($this->map[$event->code()] as $handler) {
-            $handler->handle($event);
+        if(isset($this->map[$event->code()])) {
+            foreach($this->map[$event->code()] as $handler) {
+                $handler->handle($event);
+            }
         }
     }
 }
