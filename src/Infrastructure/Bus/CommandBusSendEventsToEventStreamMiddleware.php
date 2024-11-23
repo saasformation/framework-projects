@@ -22,26 +22,15 @@ class CommandBusSendEventsToEventStreamMiddleware implements Middleware
 
     public function execute($command, callable $next)
     {
-        /** @var DomainEventStream $domainEventStream */
-        $domainEventStream = $next($command);
-
-        foreach($domainEventStream->events() as $event) {
-            $this->eventBus->listen($event);
-        }
-
         $commandName = $this->commandNameExtractor->extract($command);
         $handler = $this->handlerLocator->getHandlerForCommand($commandName);
         $methodName = $this->methodNameInflector->inflect($command, $handler);
 
-        // is_callable is used here instead of method_exists, as method_exists
-        // will fail when given a handler that relies on __call.
-        if (!is_callable([$handler, $methodName])) {
-            throw CanNotInvokeHandlerException::forCommand(
-                $command,
-                "Method '{$methodName}' does not exist on handler"
-            );
-        }
+        /** @var DomainEventStream $domainEventStream */
+        $domainEventStream = $handler->{$methodName}($command);
 
-        return $handler->{$methodName}($command);
+        foreach($domainEventStream->events() as $event) {
+            $this->eventBus->listen($event);
+        }
     }
 }
