@@ -4,13 +4,13 @@ namespace SaaSFormation\Framework\Projects\Infrastructure\EventDispatcher;
 
 use Psr\Container\ContainerInterface;
 use Psr\Log\LoggerInterface;
-use SaaSFormation\Framework\Contracts\Application\Bus\EventHandlerInterface;
 use SaaSFormation\Framework\Contracts\Application\EventDispatcher\EventDispatcherInterface;
+use SaaSFormation\Framework\Contracts\Application\ListenerInterface;
 use SaaSFormation\Framework\Contracts\Domain\DomainEvent;
 
 class EventDispatcher implements EventDispatcherInterface
 {
-    /** @var array<string, array<EventHandlerInterface>> */
+    /** @var array<string, array<ListenerInterface>> */
     private array $map;
 
     public function __construct(private readonly ContainerInterface $container, private readonly LoggerInterface $logger)
@@ -21,13 +21,13 @@ class EventDispatcher implements EventDispatcherInterface
 
         foreach ($classes as $class) {
             $reflectedClass = new \ReflectionClass($class);
-            if(!$reflectedClass->isAbstract() && in_array(EventHandlerInterface::class, class_implements($class))) {
+            if(!$reflectedClass->isAbstract() && in_array(ListenerInterface::class, class_implements($class))) {
                 if($this->container->has($class)) {
                     $service = $this->container->get($class);
-                    if(!$service instanceof EventHandlerInterface) {
-                        throw new \Exception("Event handler must implement EventHandlerInterface: $class doest not");
+                    if(!$service instanceof ListenerInterface) {
+                        throw new \Exception("Event handler must implement ListenerInterface: $class doest not");
                     }
-                    $method = new \ReflectionMethod($class, 'handle');
+                    $method = new \ReflectionMethod($class, 'listen');
                     $args = $method->getParameters();
                     if(count($args) === 1) {
                         $event = $args[0];
@@ -60,7 +60,7 @@ class EventDispatcher implements EventDispatcherInterface
     {
         if(isset($this->map[$event->code()])) {
             foreach($this->map[$event->code()] as $handler) {
-                $handler->handle($event);
+                $handler->listen($event);
             }
         }
     }
