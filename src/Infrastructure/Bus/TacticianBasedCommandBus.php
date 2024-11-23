@@ -13,14 +13,8 @@ readonly class TacticianBasedCommandBus implements CommandBusInterface
     {
     }
 
-    public function handle(CommandInterface $command): DomainEventStream
+    public function handle(CommandInterface $command): void
     {
-        $domainEventStream = $this->commandBus->handle($command);
-
-        if(!$domainEventStream instanceof DomainEventStream) {
-            throw new \Exception("Command handlers must return an instance of DomainEventStream");
-        }
-
-        return $domainEventStream;
+        $this->commandBus->handle($command);
     }
 }
