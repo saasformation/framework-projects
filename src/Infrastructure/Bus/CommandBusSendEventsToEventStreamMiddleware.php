@@ -8,15 +8,16 @@ use League\Tactician\Handler\Locator\HandlerLocator;
 use League\Tactician\Handler\MethodNameInflector\MethodNameInflector;
 use League\Tactician\Middleware;
 use SaaSFormation\Framework\Contracts\Application\Bus\EventBusInterface;
+use SaaSFormation\Framework\Contracts\Application\EventDispatcher\EventDispatcherInterface;
 use SaaSFormation\Framework\Contracts\Domain\DomainEventStream;
 
 class CommandBusSendEventsToEventStreamMiddleware implements Middleware
 {
     public function __construct(
-        private EventBusInterface $eventBus,
-        private CommandNameExtractor $commandNameExtractor,
-        private HandlerLocator $handlerLocator,
-        private MethodNameInflector $methodNameInflector)
+        private EventDispatcherInterface $eventDispatcher,
+        private CommandNameExtractor     $commandNameExtractor,
+        private HandlerLocator           $handlerLocator,
+        private MethodNameInflector      $methodNameInflector)
     {
     }
 
@@ -30,7 +31,7 @@ class CommandBusSendEventsToEventStreamMiddleware implements Middleware
         $domainEventStream = $handler->{$methodName}($command);
 
         foreach($domainEventStream->events() as $event) {
-            $this->eventBus->listen($event);
+            $this->eventDispatcher->dispatch($event);
         }
     }
 }
