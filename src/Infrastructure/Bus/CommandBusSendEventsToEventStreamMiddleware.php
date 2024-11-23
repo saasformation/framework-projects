@@ -8,6 +8,7 @@ use League\Tactician\Handler\Locator\HandlerLocator;
 use League\Tactician\Handler\MethodNameInflector\MethodNameInflector;
 use League\Tactician\Middleware;
 use SaaSFormation\Framework\Contracts\Application\Bus\EventBusInterface;
+use SaaSFormation\Framework\Contracts\Domain\DomainEventStream;
 
 class CommandBusSendEventsToEventStreamMiddleware implements Middleware
 {
@@ -21,9 +22,10 @@ class CommandBusSendEventsToEventStreamMiddleware implements Middleware
 
     public function execute($command, callable $next)
     {
+        /** @var DomainEventStream $domainEventStream */
         $domainEventStream = $next($command);
 
-        foreach($domainEventStream as $event) {
+        foreach($domainEventStream->events() as $event) {
             $this->eventBus->listen($event);
         }
 
