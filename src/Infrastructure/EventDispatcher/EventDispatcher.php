@@ -31,13 +31,22 @@ class EventDispatcher implements EventDispatcherInterface
                     $args = $method->getParameters();
                     if(count($args) === 1) {
                         $event = $args[0];
-                        if($event->getType() instanceof \ReflectionNamedType && $event->getType()->getName() === DomainEvent::class) {
-                            $code = $event->getType()->getName();
-                            $code = $code::code();
-                            $this->map[$code][] = $service;
-                            $this->logger->debug("Event handler $class for event with code $code has been registered");
+                        if($event->getType() instanceof \ReflectionUnionType || $event->getType() instanceof \ReflectionIntersectionType) {
+                            $types = $event->getType()->getTypes();
+                            foreach($types as $type) {
+                                if($type instanceof \ReflectionNamedType && $type->getName() !== DomainEvent::class) {
+                                    $reflectedType = new \ReflectionClass($type);
+                                    if($reflectedType->getParentClass() && $reflectedType->getParentClass()->getName() === DomainEvent::class) {
+                                        $code = $type->getName()::code();
+                                        if(is_string($code)) {
+                                            $this->map[$code][] = $service;
+                                            $this->logger->debug("Event handler $class for event with code $code has been registered");
+                                        }
+                                    }
+                                }
+                            }
                         } else {
-                            throw new \Exception("Event handler method param must be typed (DomainEvent)");
+                            throw new \Exception("Event handler method param must be typed (DomainEvent child)");
                         }
                     }
                 } else {
