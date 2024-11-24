@@ -103,6 +103,7 @@ services:
     arguments:
       $kurrentClientProvider: '@SaaSFormation\Framework\Projects\Infrastructure\KurrentClientProvider'
       $logger: '@default_logger'
+      $uuidFactory: '@SaaSFormation\Framework\Contracts\Common\Identity\UUIDFactoryInterface'
 
   Psr\Log\LoggerInterface: '@default_logger'
   SaaSFormation\Framework\Contracts\Domain\WriteModelRepositoryInterface: '@SaaSFormation\Framework\Projects\Infrastructure\KurrentBasedWriteModelRepository'

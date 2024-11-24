@@ -5,6 +5,7 @@ namespace SaaSFormation\Framework\Projects\Infrastructure;
 use GuzzleHttp\Client;
 use Psr\Log\LoggerInterface;
 use SaaSFormation\Framework\Contracts\Common\Identity\IdInterface;
+use SaaSFormation\Framework\Contracts\Common\Identity\UUIDFactoryInterface;
 use SaaSFormation\Framework\Contracts\Domain\Aggregate;
 use SaaSFormation\Framework\Contracts\Domain\DomainEvent;
 use SaaSFormation\Framework\Contracts\Domain\DomainEventStream;
@@ -14,7 +15,7 @@ readonly class KurrentBasedWriteModelRepository implements WriteModelRepositoryI
 {
     private Client $client;
 
-    public function __construct(private KurrentClientProvider $kurrentClientProvider, private LoggerInterface $logger)
+    public function __construct(private KurrentClientProvider $kurrentClientProvider, private LoggerInterface $logger, private UUIDFactoryInterface $uuidFactory)
     {
         $this->client = $this->kurrentClientProvider->provide();
     }
@@ -36,7 +37,7 @@ readonly class KurrentBasedWriteModelRepository implements WriteModelRepositoryI
             $this->logTryingToPush($aggregateId);
             $events = array_map(function (DomainEvent $event) {
                 return [
-                    "eventId" => $event->id()->humanReadable(),
+                    "eventId" => $event->id() ? $event->id()->humanReadable() : $this->uuidFactory->generate()->humanReadable(),
                     "eventType" => $event->code(),
                     "data" => $event->toArray()
                 ];
