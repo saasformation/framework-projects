@@ -2,16 +2,18 @@
 
 namespace SaaSFormation\Framework\Projects\Infrastructure\ReadModel;
 
+use MongoDB\BSON\ObjectId;
 use MongoDB\Client;
 use Psr\Log\LoggerInterface;
 use SaaSFormation\Framework\Contracts\Application\ReadModel\ReadModel;
 use SaaSFormation\Framework\Contracts\Application\ReadModel\ReadModelRepositoryInterface;
+use SaaSFormation\Framework\Contracts\Common\Identity\UUIDFactoryInterface;
 
 readonly abstract class MongoDBBasedReadModelRepository implements ReadModelRepositoryInterface
 {
     private Client $client;
 
-    public function __construct(private MongoDBClientProvider $mongoDBClientProvider, private LoggerInterface $logger)
+    public function __construct(private MongoDBClientProvider $mongoDBClientProvider, private LoggerInterface $logger, private UUIDFactoryInterface $uuidFactory)
     {
         $this->client = $this->mongoDBClientProvider->provide();
     }
@@ -19,10 +21,20 @@ readonly abstract class MongoDBBasedReadModelRepository implements ReadModelRepo
     public function save(ReadModel $readModel): void
     {
         $this->logger->debug("Trying to save a read model", ['read_model_code' => $readModel->code()]);
+
+        $id = $readModel->id();
+        if(!$id) {
+            $readModel->setId($id = $this->uuidFactory->generate());
+        }
+
+        $data = $readModel->toArray();
+        $data['_id'] = new ObjectId($id->humanReadable());
+
         $this->client
             ->selectDatabase($this->databaseName())
             ->selectCollection($this->collectionName())
-            ->insertOne($readModel);
+            ->updateOne(['_id' => $data['_id']], $data, ['upsert' => true]);
+
         $this->logger->debug("Read model was saved.", ['read_model_code' => $readModel->code()]);
     }
 
