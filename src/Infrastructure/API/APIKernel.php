@@ -6,9 +6,7 @@ use Monolog\Formatter\JsonFormatter;
 use Monolog\Handler\StreamHandler;
 use Monolog\Level;
 use Monolog\Logger;
-use Psr\Container\ContainerExceptionInterface;
 use Psr\Container\ContainerInterface;
-use Psr\Container\NotFoundExceptionInterface;
 use Psr\Http\Message\ResponseInterface;
 use Psr\Http\Message\ServerRequestInterface;
 use Psr\Log\LoggerInterface;
@@ -19,14 +17,13 @@ use SaaSFormation\Framework\Contracts\Infrastructure\ContainerProviderInterface;
 use SaaSFormation\Framework\Contracts\Infrastructure\EnvVarsManagerInterface;
 use SaaSFormation\Framework\Contracts\Infrastructure\EnvVarsManagerProviderInterface;
 use SaaSFormation\Framework\Contracts\Infrastructure\KernelInterface;
-use SaaSFormation\Framework\EnvVarsManager\Infrastructure\EnvVarsManager;
 use Throwable;
 
 class APIKernel implements KernelInterface
 {
     private ?ContainerInterface $container = null;
     private ?RouterInterface $router = null;
-    private ?EnvVarsManagerInterface $envVarsManager = null;
+    private EnvVarsManagerInterface $envVarsManager;
     private Logger $defaultLogger;
 
     public function __construct()
@@ -72,7 +69,7 @@ class APIKernel implements KernelInterface
 
     public function withContainer(ContainerProviderInterface $containerProvider): static
     {
-        $this->container = $containerProvider->provide($this->defaultLogger);
+        $this->container = $containerProvider->provide($this->defaultLogger, $this->envVarsManager);
 
         return $this;
     }
@@ -90,10 +87,6 @@ class APIKernel implements KernelInterface
 
     public function envVarsManager(): EnvVarsManagerInterface
     {
-        if(!$this->envVarsManager) {
-            throw new \Exception("Env vars manager must be set before trying to access it");
-        }
-
         return $this->envVarsManager;
     }
 

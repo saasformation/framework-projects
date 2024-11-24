@@ -1,4 +1,4 @@
-<?php
+<?php declare(strict_types=1);
 
 namespace SaaSFormation\Framework\Projects\Infrastructure;
 
@@ -12,9 +12,11 @@ use SaaSFormation\Framework\Contracts\Domain\WriteModelRepositoryInterface;
 
 readonly class KurrentBasedWriteModelRepository implements WriteModelRepositoryInterface
 {
-    public function __construct(private Client $eventStoreClient, private LoggerInterface $logger)
-    {
+    private Client $client;
 
+    public function __construct(private KurrentClientProvider $kurrentClientProvider, private LoggerInterface $logger)
+    {
+        $this->client = $this->kurrentClientProvider->provide();
     }
 
     public function save(Aggregate $aggregate): void
@@ -39,7 +41,7 @@ readonly class KurrentBasedWriteModelRepository implements WriteModelRepositoryI
                     "data" => $event->toArray()
                 ];
             }, $eventStream->events());
-            $this->eventStoreClient->post("/streams/$streamName", [
+            $this->client->post("/streams/$streamName", [
                 'headers' => [
                     'content-type' => 'application/vnd.eventstore.events+json',
                 ],

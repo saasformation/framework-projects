@@ -1,4 +1,20 @@
 services:
+  _instanceof:
+    SaaSFormation\Framework\Contracts\Application\Bus\CommandHandlerInterface:
+      public: true
+    SaaSFormation\Framework\Contracts\Application\Bus\QueryHandlerInterface:
+      public: true
+    SaaSFormation\Framework\Contracts\Application\ListenerInterface:
+      public: true
+
+  SaaSFormation\Framework\Projects\Infrastructure\ReadModel\MongoDBClientProvider:
+    arguments:
+      $envVarsManager: '@default_env_vars_manager'
+
+  SaaSFormation\Framework\Projects\Infrastructure\KurrentClientProvider:
+    arguments:
+      $envVarsManager: '@default_env_vars_manager'
+
   SaaSFormation\Framework\Projects\Infrastructure\Bus\TacticianCommandBusLogFormatter:
 
   SaaSFormation\Framework\Projects\Infrastructure\Bus\TacticianQueryBusLogFormatter:
@@ -86,9 +102,14 @@ services:
 
   SaaSFormation\Framework\Projects\Infrastructure\Identity\RamseyBasedUUIDFactory:
 
+  SaaSFormation\Framework\Projects\Infrastructure\ReadModel\MongoDBBasedReadModelRepository:
+    arguments:
+      $mongoDBClientProvider: '@SaaSFormation\Framework\Projects\Infrastructure\ReadModel\MongoDBClientProvider'
+      $logger: '@default_logger'
+
   SaaSFormation\Framework\Projects\Infrastructure\KurrentBasedWriteModelRepository:
     arguments:
-      $eventStoreClient:
+      $eventStoreClient: '@GuzzleHttp\Client'
       $logger: '@default_logger'
 
   Psr\Log\LoggerInterface: '@default_logger'
