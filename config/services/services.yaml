@@ -1,12 +1,4 @@
 services:
-  _instanceof:
-    SaaSFormation\Framework\Contracts\Application\Bus\CommandHandlerInterface:
-      public: true
-    SaaSFormation\Framework\Contracts\Application\Bus\QueryHandlerInterface:
-      public: true
-    SaaSFormation\Framework\Contracts\Application\ListenerInterface:
-      public: true
-
   SaaSFormation\Framework\Projects\Infrastructure\ReadModel\MongoDBClientProvider:
     arguments:
       $envVarsManager: '@default_env_vars_manager'

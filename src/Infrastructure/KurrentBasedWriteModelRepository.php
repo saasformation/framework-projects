@@ -41,12 +41,15 @@ readonly class KurrentBasedWriteModelRepository implements WriteModelRepositoryI
                     "data" => $event->toArray()
                 ];
             }, $eventStream->events());
-            $this->client->post("/streams/$streamName", [
+            $response = $this->client->post("/streams/$streamName", [
                 'headers' => [
                     'content-type' => 'application/vnd.eventstore.events+json',
                 ],
                 'body' => json_encode($events),
             ]);
+            if($response->getStatusCode() !== 201) {
+                throw new \Exception("Failed to push events for $streamName");
+            }
             $this->logPushed($aggregateId);
         } catch (\Throwable $e) {
             $this->logFailedToPush($e, $aggregateId);
