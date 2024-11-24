@@ -109,7 +109,7 @@ services:
 
   SaaSFormation\Framework\Projects\Infrastructure\KurrentBasedWriteModelRepository:
     arguments:
-      $eventStoreClient: '@GuzzleHttp\Client'
+      $kurrentClientProvider: '@SaaSFormation\Framework\Projects\Infrastructure\KurrentClientProvider'
       $logger: '@default_logger'
 
   Psr\Log\LoggerInterface: '@default_logger'
