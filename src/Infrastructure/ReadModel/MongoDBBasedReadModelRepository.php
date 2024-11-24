@@ -33,7 +33,7 @@ readonly abstract class MongoDBBasedReadModelRepository implements ReadModelRepo
         $this->client
             ->selectDatabase($this->databaseName())
             ->selectCollection($this->collectionName())
-            ->updateOne(['_id' => $data['_id']], ['$set' => $data['data']], ['upsert' => true]);
+            ->updateOne(['_id' => $data['_id']], ['$set' => ['data' => $data['data']]], ['upsert' => true]);
 
         $this->logger->debug("Read model was saved.", ['read_model_code' => $readModel->code()]);
     }
