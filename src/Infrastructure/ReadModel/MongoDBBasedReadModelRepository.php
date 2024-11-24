@@ -28,12 +28,12 @@ readonly abstract class MongoDBBasedReadModelRepository implements ReadModelRepo
         }
 
         $data = $readModel->toArray();
-        $data['_id'] = new ObjectId($id->humanReadable());
+        $data['_id'] = $id->humanReadable();
 
         $this->client
             ->selectDatabase($this->databaseName())
             ->selectCollection($this->collectionName())
-            ->updateOne(['_id' => $data['_id']], $data, ['upsert' => true]);
+            ->updateOne(['_id' => $data['_id']], ['$set' => $data['data']], ['upsert' => true]);
 
         $this->logger->debug("Read model was saved.", ['read_model_code' => $readModel->code()]);
     }
@@ -65,7 +65,7 @@ readonly abstract class MongoDBBasedReadModelRepository implements ReadModelRepo
 
         foreach ($results as $result) {
             $className = $this->readModelClass();
-            $readModels[] = $className::fromArray($result->toArray());
+            $readModels[] = $className::fromArray($result->toArray()['_id'], $result->toArray()['data']);
         }
 
         $this->logger->debug("Read models found", ['total' => count($readModels), 'criteria' => $criteria]);
