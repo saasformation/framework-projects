@@ -58,7 +58,9 @@ abstract class Endpoint implements EndpointInterface
 
     private function getFromBodyRequestByPath(ServerRequestInterface $request, string $path): StandardField
     {
-        $body = json_decode($request->getBody()->getContents());
+        $body = $request->getBody();
+        $body->rewind();
+        $body = json_decode($body->getContents());
 
         if(!is_array($body)) {
             throw new \Exception("Cannot retrieve body");
