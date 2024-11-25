@@ -82,6 +82,8 @@ services:
 
   SaaSFormation\Framework\Projects\UI\API\HTTP\ReactPHPBasedJSONResponder:
 
+  SaaSFormation\ArrayByPath\RetrieveArrayValueByPathService:
+
   SaaSFormation\Framework\Projects\UI\API\HTTP\Endpoint:
     public: true
     arguments:
@@ -89,6 +91,7 @@ services:
       $logger: '@default_logger'
       $commandBus: '@SaaSFormation\Framework\Projects\Infrastructure\Bus\TacticianBasedCommandBus'
       $queryBus: '@SaaSFormation\Framework\Projects\Infrastructure\Bus\TacticianBasedQueryBus'
+      $retrieveArrayValueByPathService: '@SaaSFormation\ArrayByPath\RetrieveArrayValueByPathService'
       $responders:
         - '@SaaSFormation\Framework\Projects\UI\API\HTTP\ReactPHPBasedJSONResponder'
 
