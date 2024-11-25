@@ -6,6 +6,8 @@ use Psr\Http\Message\ResponseInterface;
 use Psr\Http\Message\ServerRequestInterface;
 use Psr\Log\LoggerInterface;
 use ReflectionMethod;
+use SaaSFormation\ArrayByPath\RetrieveArrayValueByPathService;
+use SaaSFormation\Field\StandardField;
 use SaaSFormation\Framework\Contracts\Application\Bus\CommandBusInterface;
 use SaaSFormation\Framework\Contracts\Application\Bus\QueryBusInterface;
 use SaaSFormation\Framework\Contracts\UI\HTTP\EndpointInterface;
@@ -19,11 +21,12 @@ abstract class Endpoint implements EndpointInterface
     private array $responders;
 
     public function __construct(
-        private readonly string          $defaultResponseContentType,
-        private readonly LoggerInterface $logger,
-        protected CommandBusInterface    $commandBus,
-        protected QueryBusInterface      $queryBus,
-        ResponderInterface               ...$responders)
+        private readonly string                 $defaultResponseContentType,
+        private readonly LoggerInterface        $logger,
+        protected CommandBusInterface           $commandBus,
+        protected QueryBusInterface             $queryBus,
+        private RetrieveArrayValueByPathService $retrieveArrayValueByPathService,
+        ResponderInterface                      ...$responders)
     {
         foreach ($responders as $responder) {
             $this->responders[$responder->validForContentType()] = $responder;
@@ -32,7 +35,7 @@ abstract class Endpoint implements EndpointInterface
 
     public function doExecute(ServerRequestInterface $request): ResponseInterface
     {
-        $responseBody = $this->execute();
+        $responseBody = $this->execute($request);
 
         $accept = explode(',', $request->getHeaderLine('Accept'));
 
@@ -46,6 +49,22 @@ abstract class Endpoint implements EndpointInterface
         }
 
         return $response;
+    }
+
+    protected function body(ServerRequestInterface $request, string $path): StandardField
+    {
+        return $this->getFromBodyRequestByPath($request, $path);
+    }
+
+    private function getFromBodyRequestByPath(ServerRequestInterface $request, string $path): StandardField
+    {
+        $body = $request->getParsedBody();
+
+        if(!is_array($body)) {
+            throw new \Exception("Cannot retrieve body");
+        }
+
+        return new StandardField($this->retrieveArrayValueByPathService->get($path, $body));
     }
 
     private function getResponseDefaultStatusCode(): StatusEnum

@@ -19,6 +19,8 @@
         "ext-mongodb": "*",
         "saasformation/framework-contracts": "^1.0",
         "saasformation/framework-env-vars-manager": "^1.0",
+        "saasformation/magic-field": "^1.0",
+        "saasformation/array-by-path": "^1.0",
         "symfony/dependency-injection": "^7",
         "symfony/yaml": "^7",
         "symfony/config": "^7",
