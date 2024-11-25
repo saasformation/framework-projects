@@ -7,6 +7,10 @@ services:
     arguments:
       $envVarsManager: '@default_env_vars_manager'
 
+  SaaSFormation\Framework\Projects\Infrastructure\MySQLClientProvider:
+    arguments:
+      $envVarsManager: '@default_env_vars_manager'
+
   SaaSFormation\Framework\Projects\Infrastructure\Bus\TacticianCommandBusLogFormatter:
 
   SaaSFormation\Framework\Projects\Infrastructure\Bus\TacticianQueryBusLogFormatter:
@@ -108,6 +112,12 @@ services:
       $logger: '@default_logger'
       $uuidFactory: '@SaaSFormation\Framework\Contracts\Common\Identity\UUIDFactoryInterface'
 
+  SaaSFormation\Framework\Projects\Infrastructure\MySQLBasedWriteModelRepository:
+    arguments:
+      $mySQLClientProvider: '@SaaSFormation\Framework\Projects\Infrastructure\MySQLClientProvider'
+      $logger: '@default_logger'
+      $uuidFactory: '@SaaSFormation\Framework\Contracts\Common\Identity\UUIDFactoryInterface'
+
   Psr\Log\LoggerInterface: '@default_logger'
-  SaaSFormation\Framework\Contracts\Domain\WriteModelRepositoryInterface: '@SaaSFormation\Framework\Projects\Infrastructure\KurrentBasedWriteModelRepository'
+
   SaaSFormation\Framework\Contracts\Common\Identity\UUIDFactoryInterface: '@SaaSFormation\Framework\Projects\Infrastructure\Identity\RamseyBasedUUIDFactory'
