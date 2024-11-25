@@ -37,13 +37,13 @@ readonly class MySQLBasedWriteModelRepository extends WriteModelRepository imple
                     'event_data' => json_encode($event->toArray()),
                     'created_at' => (new \DateTimeImmutable())->format('Y-m-d H:i:s.u'),
                 ]);
+
+                $this->client->commit();
+                $this->logPushed($aggregate->id());
             } catch (\Throwable $e) {
                 $this->logFailedToPush($e, $aggregate->id());
                 $this->client->rollBack();
             }
-
-            $this->client->commit();
-            $this->logPushed($aggregate->id());
         }
     }
 
