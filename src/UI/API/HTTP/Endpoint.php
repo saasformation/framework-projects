@@ -60,7 +60,7 @@ abstract class Endpoint implements EndpointInterface
     {
         $body = $request->getBody();
         $body->rewind();
-        $body = json_decode($body->getContents());
+        $body = json_decode($body->getContents(), true);
 
         if(!is_array($body)) {
             throw new \Exception("Cannot retrieve body");
