@@ -43,6 +43,7 @@ readonly class MySQLBasedWriteModelRepository extends WriteModelRepository imple
             } catch (\Throwable $e) {
                 $this->logFailedToPush($e, $aggregate->id());
                 $this->client->rollBack();
+                throw new \Exception($e->getMessage());
             }
         }
     }
