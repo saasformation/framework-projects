@@ -34,7 +34,8 @@
         "league/tactician-logger": "^0.11",
         "ramsey/uuid": "^4.7",
         "guzzlehttp/guzzle": "^7.9",
-        "mongodb/mongodb": "^1.20"
+        "mongodb/mongodb": "^1.20",
+        "beberlei/assert": "^3.3"
     },
     "extra": {
         "branch-alias": {
