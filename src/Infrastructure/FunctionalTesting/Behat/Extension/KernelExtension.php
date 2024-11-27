@@ -13,6 +13,7 @@ use SaaSFormation\Framework\Contracts\Infrastructure\ContainerProviderInterface;
 use SaaSFormation\Framework\Contracts\Infrastructure\KernelInterface;
 use SaaSFormation\Framework\Projects\Infrastructure\API\APIKernel;
 use SaaSFormation\Framework\Projects\Infrastructure\API\LeagueRouterProvider;
+use SaaSFormation\Framework\Projects\Infrastructure\EnvVarsManagerProvider;
 use SaaSFormation\Framework\Projects\Infrastructure\SymfonyContainerProvider;
 use Symfony\Component\Config\Definition\Builder\ArrayNodeDefinition;
 use Symfony\Component\DependencyInjection\ContainerBuilder;
@@ -39,6 +40,7 @@ class KernelExtension implements Extension
         $kernelArrayNode = $builderChildren->arrayNode('kernel');
         $kernelChildren = $kernelArrayNode->children();
         $kernelChildren->scalarNode('main_services_file_path');
+        $kernelChildren->scalarNode('vars_file_path');
         $kernelChildren->scalarNode('class');
     }
 
@@ -69,6 +71,7 @@ class KernelExtension implements Extension
     private function buildKernel(array $config): KernelInterface
     {
         return new APIKernel(
+            new EnvVarsManagerProvider($config['kernel']['vars_file_path']),
             new SymfonyContainerProvider($config['kernel']['main_services_file_path']),
             new LeagueRouterProvider()
         );

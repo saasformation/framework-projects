@@ -24,7 +24,7 @@ class SymfonyContainerProvider implements ContainerProviderInterface
     /**
      * @throws Exception
      */
-    public function provide(KernelInterface $kernel): ContainerInterface
+    public function provide(KernelInterface $kernel, EnvVarsManagerInterface $envVarsManager): ContainerInterface
     {
         $container = new ContainerBuilder();
 
@@ -32,10 +32,12 @@ class SymfonyContainerProvider implements ContainerProviderInterface
         $loader->load($this->servicesFilePath);
 
         $container->setDefinition(KernelInterface::class, (new Definition(KernelInterface::class, []))->setSynthetic(true)->setPublic(true));
+        $container->setDefinition(EnvVarsManagerInterface::class, (new Definition(EnvVarsManagerInterface::class, []))->setSynthetic(true)->setPublic(true));
 
         $container->compile();
 
         $container->set(KernelInterface::class, $kernel);
+        $container->set(EnvVarsManagerInterface::class, $envVarsManager);
 
         return $container;
     }

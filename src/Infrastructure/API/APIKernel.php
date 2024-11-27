@@ -16,6 +16,7 @@ use SaaSFormation\Framework\Contracts\Infrastructure\API\RouterInterface;
 use SaaSFormation\Framework\Contracts\Infrastructure\API\RouterProviderInterface;
 use SaaSFormation\Framework\Contracts\Infrastructure\ContainerProviderInterface;
 use SaaSFormation\Framework\Contracts\Infrastructure\EnvVarsManagerInterface;
+use SaaSFormation\Framework\Contracts\Infrastructure\EnvVarsManagerProviderInterface;
 use SaaSFormation\Framework\Contracts\Infrastructure\KernelInterface;
 use Throwable;
 
@@ -26,6 +27,7 @@ class APIKernel implements KernelInterface
     private Logger $emergencyLogger;
 
     public function __construct(
+        EnvVarsManagerProviderInterface $envVarsManagerProvider,
         ContainerProviderInterface $containerProvider,
         RouterProviderInterface $routerProvider,
         string $logLevelEnvVarName = "LOG_LEVEL"
@@ -48,7 +50,8 @@ class APIKernel implements KernelInterface
             die();
         }
 
-        $this->loadContainer($containerProvider);
+        $envVarsManager = $this->loadEnvVarsManager($envVarsManagerProvider);
+        $this->loadContainer($containerProvider, $envVarsManager);
         $this->loadRouter($routerProvider);
     }
 
@@ -102,14 +105,10 @@ class APIKernel implements KernelInterface
         return $this->emergencyLogger;
     }
 
-    /**
-     * @param ContainerProviderInterface $containerProvider
-     * @return void
-     */
-    private function loadContainer(ContainerProviderInterface $containerProvider): void
+    private function loadContainer(ContainerProviderInterface $containerProvider, EnvVarsManagerInterface $envVarsManager): void
     {
         try {
-            $this->container = $containerProvider->provide($this);
+            $this->container = $containerProvider->provide($this, $envVarsManager);
         } catch (Throwable $e) {
             $this->emergencyLogger->critical("Failed to load container", [
                 'exception' => [
@@ -136,5 +135,25 @@ class APIKernel implements KernelInterface
             ]);
             die();
         }
+    }
+
+    /**
+     * @param EnvVarsManagerProviderInterface $envVarsManagerProvider
+     * @return EnvVarsManagerInterface
+     */
+    public function loadEnvVarsManager(EnvVarsManagerProviderInterface $envVarsManagerProvider): EnvVarsManagerInterface
+    {
+        try {
+            $envVarsManager = $envVarsManagerProvider->provide();
+        } catch (Throwable $e) {
+            $this->emergencyLogger->critical("Failed to load env vars manager", [
+                'exception' => [
+                    'message' => $e->getMessage(),
+                ]
+            ]);
+            die();
+        }
+
+        return $envVarsManager;
     }
 }
