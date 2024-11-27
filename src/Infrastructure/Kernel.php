@@ -1,6 +1,6 @@
 <?php declare(strict_types=1);
 
-namespace SaaSFormation\Framework\Projects\Infrastructure\API;
+namespace SaaSFormation\Framework\Projects\Infrastructure;
 
 use Assert\Assert;
 use Monolog\Formatter\JsonFormatter;
@@ -20,7 +20,7 @@ use SaaSFormation\Framework\Contracts\Infrastructure\EnvVarsManagerProviderInter
 use SaaSFormation\Framework\Contracts\Infrastructure\KernelInterface;
 use Throwable;
 
-class APIKernel implements KernelInterface
+class Kernel implements KernelInterface
 {
     private ContainerInterface $container;
     private RouterInterface $router;

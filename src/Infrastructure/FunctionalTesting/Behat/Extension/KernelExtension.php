@@ -6,18 +6,14 @@ use Assert\Assert;
 use Behat\Testwork\ServiceContainer\Extension;
 use Behat\Testwork\ServiceContainer\ExtensionManager;
 use Psr\Container\ContainerExceptionInterface;
-use Psr\Container\ContainerInterface;
 use Psr\Container\NotFoundExceptionInterface;
-use SaaSFormation\Framework\Contracts\Infrastructure\API\RouterProviderInterface;
-use SaaSFormation\Framework\Contracts\Infrastructure\ContainerProviderInterface;
 use SaaSFormation\Framework\Contracts\Infrastructure\KernelInterface;
-use SaaSFormation\Framework\Projects\Infrastructure\API\APIKernel;
 use SaaSFormation\Framework\Projects\Infrastructure\API\LeagueRouterProvider;
+use SaaSFormation\Framework\Projects\Infrastructure\Kernel;
 use SaaSFormation\Framework\Projects\Infrastructure\EnvVarsManagerProvider;
 use SaaSFormation\Framework\Projects\Infrastructure\SymfonyContainerProvider;
 use Symfony\Component\Config\Definition\Builder\ArrayNodeDefinition;
 use Symfony\Component\DependencyInjection\ContainerBuilder;
-use Symfony\Component\DependencyInjection\Definition;
 
 class KernelExtension implements Extension
 {
@@ -70,7 +66,7 @@ class KernelExtension implements Extension
      */
     private function buildKernel(array $config): KernelInterface
     {
-        return new APIKernel(
+        return new Kernel(
             new EnvVarsManagerProvider($config['kernel']['vars_file_path']),
             new SymfonyContainerProvider($config['kernel']['main_services_file_path']),
             new LeagueRouterProvider()
