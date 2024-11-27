@@ -127,6 +127,7 @@ services:
   StreamedJSONFormattedLogger:
     class: Monolog\Logger
     arguments:
+      $name: 'logger'
       $handlers:
         - '@Monolog\Handler\StreamHandler'
     calls:
