@@ -125,8 +125,6 @@ class ReactBasedAPIServer implements APIServerInterface
 
     public function start(): void
     {
-        $this->kernel->start();
-
         $loop = Loop::get();
 
         $http = new HttpServer(

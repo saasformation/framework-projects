@@ -2,6 +2,7 @@
 
 namespace SaaSFormation\Framework\Projects\Infrastructure\API;
 
+use Assert\Assert;
 use Monolog\Formatter\JsonFormatter;
 use Monolog\Handler\StreamHandler;
 use Monolog\Level;
@@ -15,87 +16,58 @@ use SaaSFormation\Framework\Contracts\Infrastructure\API\RouterInterface;
 use SaaSFormation\Framework\Contracts\Infrastructure\API\RouterProviderInterface;
 use SaaSFormation\Framework\Contracts\Infrastructure\ContainerProviderInterface;
 use SaaSFormation\Framework\Contracts\Infrastructure\EnvVarsManagerInterface;
-use SaaSFormation\Framework\Contracts\Infrastructure\EnvVarsManagerProviderInterface;
 use SaaSFormation\Framework\Contracts\Infrastructure\KernelInterface;
 use Throwable;
 
 class APIKernel implements KernelInterface
 {
-    private ?ContainerInterface $container = null;
-    private ?RouterInterface $router = null;
-    private EnvVarsManagerInterface $envVarsManager;
-    private Logger $defaultLogger;
+    private ContainerInterface $container;
+    private RouterInterface $router;
+    private Logger $emergencyLogger;
 
-    public function __construct()
+    public function __construct(
+        ContainerProviderInterface $containerProvider,
+        RouterProviderInterface $routerProvider,
+        string $logLevelEnvVarName = "LOG_LEVEL"
+    )
     {
-        $this->defaultLogger = new Logger('default');
+        $this->emergencyLogger = new Logger('emergency_logger');
 
         $logLevel = Level::Debug;
 
-        if(getenv('LOG_LEVEL') !== false && in_array(getenv('LOG_LEVEL'), ['Debug', 'Info', 'Notice', 'Warning', 'Error', 'Critical', 'Alert', 'Emergency'])) {
-            $logLevel = Level::fromName(getenv('LOG_LEVEL'));
+        if(getenv($logLevelEnvVarName) !== false && in_array(getenv($logLevelEnvVarName), ['Debug', 'Info', 'Notice', 'Warning', 'Error', 'Critical', 'Alert', 'Emergency'])) {
+            $logLevel = Level::fromName(getenv($logLevelEnvVarName));
         }
 
         $handler = new StreamHandler('php://stdout',  $logLevel);
         $handler->setFormatter(new JsonFormatter());
-        $this->defaultLogger->pushHandler($handler);
+        $this->emergencyLogger->pushHandler($handler);
 
-        if(!getenv('LOG_LEVEL')) {
-            $this->defaultLogger->critical("No log level has set via LOG_LEVEL env var");
-            die();
-        }
-    }
-
-    /**
-     * @throws \Exception
-     */
-    public function start(): void
-    {
-        $this->checkContainerIsSet();
-        $this->checkRouterIsSet();
-    }
-
-    public function withEnvVars(EnvVarsManagerProviderInterface $envVarsManagerProvider): static
-    {
-        try {
-            $this->envVarsManager = $envVarsManagerProvider->provide();
-        } catch(Throwable $e) {
-            $this->defaultLogger->critical($e->getMessage());
+        if(!getenv($logLevelEnvVarName)) {
+            $this->emergencyLogger->critical("No log level has set via LOG_LEVEL env var");
             die();
         }
 
-        return $this;
+        $this->loadContainer($containerProvider);
+        $this->loadRouter($routerProvider);
     }
 
-    public function withContainer(ContainerProviderInterface $containerProvider): static
+    public function container(): ContainerInterface
     {
-        $this->container = $containerProvider->provide($this->defaultLogger, $this->envVarsManager);
-
-        return $this;
-    }
-
-    public function withRouter(RouterProviderInterface $routerProvider): static
-    {
-        if(!$this->container) {
-            throw new \Exception("Container must be set before initializing router");
-        }
-
-        $this->router = $routerProvider->provide($this->container);
-
-        return $this;
+        return $this->container;
     }
 
     public function envVarsManager(): EnvVarsManagerInterface
     {
-        return $this->envVarsManager;
+        $envVarsManager = $this->container->get(EnvVarsManagerInterface::class);
+
+        Assert::that($envVarsManager)->isInstanceOf(EnvVarsManagerInterface::class);
+
+        return $envVarsManager;
     }
 
     public function processRequest(ServerRequestInterface $request): ResponseInterface
     {
-        if(!$this->router) {
-            throw new \Exception("Router must be set before trying to access it");
-        }
-
         try {
             return $this->router->route($request);
         } catch (Throwable $e) {
@@ -118,37 +90,51 @@ class APIKernel implements KernelInterface
             ]
         ];
 
-        $this->defaultLogger->error($exception->getMessage(), $data);
+        $this->emergencyLogger->error($exception->getMessage(), $data);
 
         return Response::json([
             'data' => $data
         ]);
     }
 
-    /**
-     * @return void
-     * @throws \Exception
-     */
-    public function checkContainerIsSet(): void
-    {
-        if (!$this->container) {
-            throw new \Exception("No container has been set; remember to call withContainer method");
-        }
-    }
-
-    /**
-     * @return void
-     * @throws \Exception
-     */
-    public function checkRouterIsSet(): void
-    {
-        if (!$this->router) {
-            throw new \Exception("No router has been set; remember to call withRouter method");
-        }
-    }
-
     public function logger(): LoggerInterface
     {
-        return $this->defaultLogger;
+        return $this->emergencyLogger;
+    }
+
+    /**
+     * @param ContainerProviderInterface $containerProvider
+     * @return void
+     */
+    private function loadContainer(ContainerProviderInterface $containerProvider): void
+    {
+        try {
+            $this->container = $containerProvider->provide($this);
+        } catch (Throwable $e) {
+            $this->emergencyLogger->critical("Failed to load container", [
+                'exception' => [
+                    'message' => $e->getMessage(),
+                ]
+            ]);
+            die();
+        }
+    }
+
+    /**
+     * @param RouterProviderInterface $routerProvider
+     * @return void
+     */
+    private function loadRouter(RouterProviderInterface $routerProvider): void
+    {
+        try {
+            $this->router = $routerProvider->provide($this->container);
+        } catch (Throwable $e) {
+            $this->emergencyLogger->critical("Failed to load router", [
+                'exception' => [
+                    'message' => $e->getMessage(),
+                ]
+            ]);
+            die();
+        }
     }
 }
