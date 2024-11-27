@@ -130,6 +130,7 @@ services:
       $handlers:
         - '@Monolog\Handler\StreamHandler'
     calls:
-      - setFormatter: '@Monolog\Formatter\JsonFormatter'
+      - setFormatter:
+        - '@Monolog\Formatter\JsonFormatter'
 
   SaaSFormation\Framework\Contracts\Common\Identity\UUIDFactoryInterface: '@SaaSFormation\Framework\Projects\Infrastructure\Identity\RamseyBasedUUIDFactory'
