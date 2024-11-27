@@ -118,11 +118,14 @@ services:
       $logger: '@default_logger'
       $uuidFactory: '@SaaSFormation\Framework\Contracts\Common\Identity\UUIDFactoryInterface'
 
+  Monolog\Formatter\JsonFormatter:
+
   Monolog\Handler\StreamHandler:
     arguments:
       $stream: '%env(LOG_STREAM)%'
-
-  Monolog\Formatter\JsonFormatter:
+    calls:
+      - setFormatter:
+          - '@Monolog\Formatter\JsonFormatter'
 
   StreamedJSONFormattedLogger:
     class: Monolog\Logger
@@ -130,8 +133,5 @@ services:
       $name: 'logger'
       $handlers:
         - '@Monolog\Handler\StreamHandler'
-    calls:
-      - setFormatter:
-        - '@Monolog\Formatter\JsonFormatter'
 
   SaaSFormation\Framework\Contracts\Common\Identity\UUIDFactoryInterface: '@SaaSFormation\Framework\Projects\Infrastructure\Identity\RamseyBasedUUIDFactory'
