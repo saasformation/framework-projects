@@ -24,7 +24,7 @@ abstract readonly class Endpoint implements EndpointInterface
      * @param CommandBusInterface $commandBus
      * @param QueryBusInterface $queryBus
      * @param RetrieveArrayValueByPathService $retrieveArrayValueByPathService
-     * @param ResponderInterface[] $responders
+     * @param array<string, ResponderInterface> $responders
      */
     public function __construct(
         private string                          $defaultResponseContentType,
