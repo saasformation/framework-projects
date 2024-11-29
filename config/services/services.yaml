@@ -118,22 +118,6 @@ services:
       $logger: '@default_logger'
       $uuidFactory: '@SaaSFormation\Framework\Contracts\Common\Identity\UUIDFactoryInterface'
 
-  Monolog\Formatter\JsonFormatter:
-
-  Monolog\Handler\StreamHandler:
-    arguments:
-      $stream: '%env(LOG_STREAM)%'
-    calls:
-      - setFormatter:
-          - '@Monolog\Formatter\JsonFormatter'
-
-  StreamedJSONFormattedLogger:
-    class: Monolog\Logger
-    arguments:
-      $name: 'logger'
-      $handlers:
-        - '@Monolog\Handler\StreamHandler'
-
   SaaSFormation\Framework\Contracts\Application\Bus\CommandBusInterface:
     public: true
     alias: 'SaaSFormation\Framework\Projects\Infrastructure\Bus\TacticianBasedCommandBus'

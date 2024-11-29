@@ -8,12 +8,7 @@ use Monolog\Handler\StreamHandler;
 use Monolog\Level;
 use Monolog\Logger;
 use Psr\Container\ContainerInterface;
-use Psr\Http\Message\ResponseInterface;
-use Psr\Http\Message\ServerRequestInterface;
 use Psr\Log\LoggerInterface;
-use React\Http\Message\Response;
-use SaaSFormation\Framework\Contracts\Infrastructure\API\RouterInterface;
-use SaaSFormation\Framework\Contracts\Infrastructure\API\RouterProviderInterface;
 use SaaSFormation\Framework\Contracts\Infrastructure\ContainerProviderInterface;
 use SaaSFormation\Framework\Contracts\Infrastructure\EnvVarsManagerInterface;
 use SaaSFormation\Framework\Contracts\Infrastructure\EnvVarsManagerProviderInterface;
@@ -23,7 +18,7 @@ use Throwable;
 class Kernel implements KernelInterface
 {
     private ContainerInterface $container;
-    private Logger $emergencyLogger;
+    private Logger $logger;
 
     public function __construct(
         EnvVarsManagerProviderInterface $envVarsManagerProvider,
@@ -31,7 +26,7 @@ class Kernel implements KernelInterface
         string $logLevelEnvVarName = "LOG_LEVEL"
     )
     {
-        $this->emergencyLogger = new Logger('emergency_logger');
+        $logger = new Logger('emergency_logger');
 
         $logLevel = Level::Debug;
 
@@ -41,15 +36,16 @@ class Kernel implements KernelInterface
 
         $handler = new StreamHandler('php://stdout',  $logLevel);
         $handler->setFormatter(new JsonFormatter());
-        $this->emergencyLogger->pushHandler($handler);
+        $logger->pushHandler($handler);
 
         if(!getenv($logLevelEnvVarName)) {
-            $this->emergencyLogger->critical("No log level has set via LOG_LEVEL env var");
+            $logger->critical("No log level has set via LOG_LEVEL env var");
             die();
         }
 
         $envVarsManager = $this->loadEnvVarsManager($envVarsManagerProvider);
-        $this->loadContainer($containerProvider, $envVarsManager);
+        $this->loadContainer($containerProvider, $envVarsManager, $logger);
+        $this->logger = $logger;
     }
 
     public function container(): ContainerInterface
@@ -68,15 +64,15 @@ class Kernel implements KernelInterface
 
     public function logger(): LoggerInterface
     {
-        return $this->emergencyLogger;
+        return $this->logger;
     }
 
-    private function loadContainer(ContainerProviderInterface $containerProvider, EnvVarsManagerInterface $envVarsManager): void
+    private function loadContainer(ContainerProviderInterface $containerProvider, EnvVarsManagerInterface $envVarsManager, LoggerInterface $logger): void
     {
         try {
-            $this->container = $containerProvider->provide($this, $envVarsManager);
+            $this->container = $containerProvider->provide($this, $envVarsManager, $logger);
         } catch (Throwable $e) {
-            $this->emergencyLogger->critical("Failed to load container", [
+            $this->logger()->critical("Failed to load container", [
                 'exception' => [
                     'message' => $e->getMessage(),
                 ]
@@ -94,7 +90,7 @@ class Kernel implements KernelInterface
         try {
             $envVarsManager = $envVarsManagerProvider->provide();
         } catch (Throwable $e) {
-            $this->emergencyLogger->critical("Failed to load env vars manager", [
+            $this->logger()->critical("Failed to load env vars manager", [
                 'exception' => [
                     'message' => $e->getMessage(),
                 ]

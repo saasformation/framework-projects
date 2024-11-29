@@ -3,7 +3,9 @@
 namespace SaaSFormation\Framework\Projects\Infrastructure;
 
 use Exception;
+use Monolog\Logger;
 use Psr\Container\ContainerInterface;
+use Psr\Log\LoggerInterface;
 use SaaSFormation\Framework\Contracts\Infrastructure\ContainerProviderInterface;
 use SaaSFormation\Framework\Contracts\Infrastructure\EnvVarsManagerInterface;
 use SaaSFormation\Framework\Contracts\Infrastructure\KernelInterface;
@@ -21,7 +23,7 @@ class SymfonyContainerProvider implements ContainerProviderInterface
     /**
      * @throws Exception
      */
-    public function provide(KernelInterface $kernel, EnvVarsManagerInterface $envVarsManager): ContainerInterface
+    public function provide(KernelInterface $kernel, EnvVarsManagerInterface $envVarsManager, LoggerInterface $logger): ContainerInterface
     {
         $container = new ContainerBuilder();
 
@@ -30,11 +32,15 @@ class SymfonyContainerProvider implements ContainerProviderInterface
 
         $container->setDefinition(KernelInterface::class, (new Definition(KernelInterface::class, []))->setSynthetic(true)->setPublic(true));
         $container->setDefinition(EnvVarsManagerInterface::class, (new Definition(EnvVarsManagerInterface::class, []))->setSynthetic(true)->setPublic(true));
+        $container->setDefinition(Logger::class, (new Definition(Logger::class, []))->setSynthetic(true)->setPublic(true));
+        $container->setAlias(LoggerInterface::class, Logger::class);
+        $container->setAlias('default_logger', LoggerInterface::class);
 
         $container->compile();
 
         $container->set(KernelInterface::class, $kernel);
         $container->set(EnvVarsManagerInterface::class, $envVarsManager);
+        $container->set(Logger::class, $logger);
 
         return $container;
     }
