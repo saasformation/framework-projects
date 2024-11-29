@@ -97,7 +97,7 @@ services:
       $queryBus: '@SaaSFormation\Framework\Projects\Infrastructure\Bus\TacticianBasedQueryBus'
       $retrieveArrayValueByPathService: '@SaaSFormation\ArrayByPath\RetrieveArrayValueByPathService'
       $responders:
-        - application/json: '@SaaSFormation\Framework\Projects\UI\API\HTTP\ReactPHPBasedJSONResponder'
+        application/json: '@SaaSFormation\Framework\Projects\UI\API\HTTP\ReactPHPBasedJSONResponder'
 
   SaaSFormation\Framework\Projects\Infrastructure\Identity\RamseyBasedUUIDFactory:
 
