@@ -73,7 +73,7 @@ abstract readonly class Endpoint implements EndpointInterface
             throw new \Exception("Cannot retrieve body");
         }
 
-        return new StandardField($this->retrieveArrayValueByPathService->get($path, $body));
+        return new StandardField($this->retrieveArrayValueByPathService->find($path, $body));
     }
 
     private function getResponseDefaultStatusCode(): StatusEnum
