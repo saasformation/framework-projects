@@ -10,27 +10,30 @@ use SaaSFormation\ArrayByPath\RetrieveArrayValueByPathService;
 use SaaSFormation\Field\StandardField;
 use SaaSFormation\Framework\Contracts\Application\Bus\CommandBusInterface;
 use SaaSFormation\Framework\Contracts\Application\Bus\QueryBusInterface;
+use SaaSFormation\Framework\Contracts\UI\HTTP\ArrayableInterface;
 use SaaSFormation\Framework\Contracts\UI\HTTP\EndpointInterface;
 use SaaSFormation\Framework\Contracts\UI\HTTP\ResponderInterface;
 use SaaSFormation\Framework\Contracts\UI\HTTP\StatusEnum;
 use SaaSFormation\Framework\Projects\UI\API\HTTP\Attributes\StatusCode;
 
-abstract class Endpoint implements EndpointInterface
+abstract readonly class Endpoint implements EndpointInterface
 {
-    /** @var ResponderInterface[] */
-    private array $responders;
-
+    /**
+     * @param string $defaultResponseContentType
+     * @param LoggerInterface $logger
+     * @param CommandBusInterface $commandBus
+     * @param QueryBusInterface $queryBus
+     * @param RetrieveArrayValueByPathService $retrieveArrayValueByPathService
+     * @param ResponderInterface[] $responders
+     */
     public function __construct(
-        private readonly string                 $defaultResponseContentType,
-        private readonly LoggerInterface        $logger,
+        private string                          $defaultResponseContentType,
+        private LoggerInterface                 $logger,
         protected CommandBusInterface           $commandBus,
         protected QueryBusInterface             $queryBus,
         private RetrieveArrayValueByPathService $retrieveArrayValueByPathService,
-        ResponderInterface                      ...$responders)
+        private array                           $responders)
     {
-        foreach ($responders as $responder) {
-            $this->responders[$responder->validForContentType()] = $responder;
-        }
     }
 
     public function doExecute(ServerRequestInterface $request): ResponseInterface
@@ -43,7 +46,11 @@ abstract class Endpoint implements EndpointInterface
 
         foreach ($accept as $format) {
             if (isset($this->responders[$format])) {
-                $response = $this->responders[$request->getHeaderLine('Accept')]->respond($this->getResponseDefaultStatusCode(), $responseBody->toArray());
+                $data = null;
+                if ($responseBody instanceof ArrayableInterface) {
+                    $data = $responseBody->toArray();
+                }
+                $response = $this->responders[$request->getHeaderLine('Accept')]->respond($this->getResponseDefaultStatusCode(), $data);
                 break;
             }
         }
@@ -62,7 +69,7 @@ abstract class Endpoint implements EndpointInterface
         $body->rewind();
         $body = json_decode($body->getContents(), true);
 
-        if(!is_array($body)) {
+        if (!is_array($body)) {
             throw new \Exception("Cannot retrieve body");
         }
 

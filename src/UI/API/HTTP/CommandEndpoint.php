@@ -4,7 +4,7 @@ namespace SaaSFormation\Framework\Projects\UI\API\HTTP;
 
 use SaaSFormation\Framework\Contracts\Application\Bus\CommandInterface;
 
-abstract class CommandEndpoint extends Endpoint
+abstract readonly class CommandEndpoint extends Endpoint
 {
     protected function handle(CommandInterface $command): void
     {
