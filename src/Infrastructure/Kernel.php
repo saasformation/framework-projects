@@ -37,6 +37,7 @@ class Kernel implements KernelInterface
         $handler = new StreamHandler('php://stdout',  $logLevel);
         $handler->setFormatter(new JsonFormatter());
         $logger->pushHandler($handler);
+        $this->logger = $logger;
 
         if(!getenv($logLevelEnvVarName)) {
             $logger->critical("No log level has set via LOG_LEVEL env var");
@@ -45,7 +46,6 @@ class Kernel implements KernelInterface
 
         $envVarsManager = $this->loadEnvVarsManager($envVarsManagerProvider);
         $this->loadContainer($containerProvider, $envVarsManager, $logger);
-        $this->logger = $logger;
     }
 
     public function container(): ContainerInterface
