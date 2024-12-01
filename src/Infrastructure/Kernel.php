@@ -29,12 +29,16 @@ class Kernel implements KernelInterface
         $logger = new Logger('emergency_logger');
 
         $logLevel = Level::Debug;
-
         if(getenv($logLevelEnvVarName) !== false && in_array(getenv($logLevelEnvVarName), ['Debug', 'Info', 'Notice', 'Warning', 'Error', 'Critical', 'Alert', 'Emergency'])) {
             $logLevel = Level::fromName(getenv($logLevelEnvVarName));
         }
 
-        $handler = new StreamHandler('php://stdout',  $logLevel);
+        $logStream = "php://stdout";
+        if(getenv("LOG_STREAM") !== false) {
+            $logStream = getenv("LOG_STREAM");
+        }
+
+        $handler = new StreamHandler($logStream,  $logLevel);
         $handler->setFormatter(new JsonFormatter());
         $logger->pushHandler($handler);
         $this->logger = $logger;
