@@ -2,11 +2,8 @@
 
 namespace SaaSFormation\Framework\Projects\Infrastructure\API;
 
-use Psr\Http\Message\ResponseInterface;
-use Psr\Http\Message\ServerRequestInterface;
 use React\EventLoop\Loop;
 use React\Http\HttpServer;
-use React\Http\Message\Response;
 use React\Http\Middleware\LimitConcurrentRequestsMiddleware;
 use React\Http\Middleware\RequestBodyBufferMiddleware;
 use React\Http\Middleware\RequestBodyParserMiddleware;
@@ -14,11 +11,13 @@ use React\Http\Middleware\StreamingRequestMiddleware;
 use React\Socket\SecureServer;
 use React\Socket\SocketServer;
 use SaaSFormation\Framework\Contracts\Infrastructure\API\APIServerInterface;
+use SaaSFormation\Framework\Contracts\Infrastructure\API\RequestErrorProcessorInterface;
+use SaaSFormation\Framework\Contracts\Infrastructure\API\RequestProcessorInterface;
 use SaaSFormation\Framework\Contracts\Infrastructure\API\RouterInterface;
 use SaaSFormation\Framework\Contracts\Infrastructure\API\RouterProviderInterface;
 use SaaSFormation\Framework\Contracts\Infrastructure\KernelInterface;
 
-class ReactBasedAPIServer implements APIServerInterface
+readonly class ReactBasedAPIServer implements APIServerInterface
 {
     private RouterInterface $router;
 
@@ -27,8 +26,16 @@ class ReactBasedAPIServer implements APIServerInterface
         $this->router = $routerProvider->provide($kernel->container());
     }
 
-    public function start(): void
+    public function start(?RequestProcessorInterface $requestProcessor = null, ?RequestErrorProcessorInterface $requestErrorProcessor = null): void
     {
+        if(!$requestErrorProcessor) {
+            $requestErrorProcessor = new DefaultRequestErrorProcessor($this->kernel->logger());
+        }
+
+        if(!$requestProcessor) {
+            $requestProcessor = new DefaultRequestProcessor($this->router, $requestErrorProcessor);
+        }
+
         $loop = Loop::get();
 
         $http = new HttpServer(
@@ -36,14 +43,14 @@ class ReactBasedAPIServer implements APIServerInterface
             new LimitConcurrentRequestsMiddleware($this->config->maxConcurrentRequests()),
             new RequestBodyBufferMiddleware($this->config->maxRequestSizeInMb() * 1024 * 1024),
             new RequestBodyParserMiddleware(),
-            [$this, "processRequest"]
+            [$requestProcessor, "processRequest"]
         );
 
         $host = $this->config->host();
         $port = $this->config->port();
         $socket = new SocketServer("$host:$port", [], $loop);
 
-        $http->on('error', [$this, "processError"]);
+        $http->on('error', [$requestErrorProcessor, "processError"]);
 
         if($this->config->enableSSL()) {
             $secureSocket = new SecureServer($socket, $loop, [
@@ -66,36 +73,5 @@ class ReactBasedAPIServer implements APIServerInterface
         });
 
         $loop->run();
-    }
-
-    public function processRequest(ServerRequestInterface $request): ResponseInterface
-    {
-        try {
-            return $this->router->route($request);
-        } catch (\Throwable $e) {
-            return $this->processError($request, $e);
-        }
-    }
-
-    public function processError(ServerRequestInterface $request, \Throwable $exception): ResponseInterface
-    {
-        $data = [
-            'error' => [
-                'message' => $exception->getMessage(),
-                'file' => $exception->getFile(),
-                'line' => $exception->getLine()
-            ],
-            'request' => [
-                'correlation_id' => $request->getHeaderLine('correlation-id'),
-                'url' => $request->getUri()->getPath(),
-                'user_agent' => $request->getHeaderLine('user-agent')
-            ]
-        ];
-
-        $this->kernel->logger()->error($exception->getMessage(), $data);
-
-        return Response::json([
-            'data' => $data
-        ]);
     }
 }
