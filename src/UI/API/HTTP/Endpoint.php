@@ -10,8 +10,11 @@ use SaaSFormation\ArrayByPath\RetrieveArrayValueByPathService;
 use SaaSFormation\Field\StandardField;
 use SaaSFormation\Framework\Contracts\Application\Bus\CommandBusInterface;
 use SaaSFormation\Framework\Contracts\Application\Bus\QueryBusInterface;
+use SaaSFormation\Framework\Contracts\Domain\DuplicatedAggregateException;
 use SaaSFormation\Framework\Contracts\UI\HTTP\ArrayableInterface;
+use SaaSFormation\Framework\Contracts\UI\HTTP\BadRequestException;
 use SaaSFormation\Framework\Contracts\UI\HTTP\EndpointInterface;
+use SaaSFormation\Framework\Contracts\UI\HTTP\NoResponderAvailableForAcceptHeaderException;
 use SaaSFormation\Framework\Contracts\UI\HTTP\ResponderInterface;
 use SaaSFormation\Framework\Contracts\UI\HTTP\StatusEnum;
 use SaaSFormation\Framework\Projects\UI\API\HTTP\Attributes\StatusCode;
@@ -38,31 +41,69 @@ abstract readonly class Endpoint implements EndpointInterface
 
     public function doExecute(ServerRequestInterface $request): ResponseInterface
     {
-        $responseBody = $this->execute($request);
+        $responder = $this->responders[$this->defaultResponseContentType];
 
+        try {
+            return $responder->respond($this->getResponseDefaultStatusCode(), $this->getResponseBodyData($request));
+        } catch (NoResponderAvailableForAcceptHeaderException) {
+            return $responder->respond(StatusEnum::HTTP_NOT_ACCEPTABLE);
+        } catch(BadRequestException $e) {
+            return $responder->respond(StatusEnum::HTTP_BAD_REQUEST, [
+                "data" => [
+                    "error" => [
+                        "message" => $e->getMessage(),
+                        "details" => $e->requestErrors()
+                    ]
+                ]
+            ]);
+        } catch (DuplicatedAggregateException) {
+            return $responder->respond(StatusEnum::HTTP_CONFLICT);
+        }
+    }
+
+    public function getResponder(ServerRequestInterface $request): ResponderInterface
+    {
+        $responder = null;
         $accept = explode(',', $request->getHeaderLine('Accept'));
-
-        $response = $this->responders[$this->defaultResponseContentType]->respond(StatusEnum::HTTP_NOT_ACCEPTABLE);
 
         foreach ($accept as $format) {
             if (isset($this->responders[$format])) {
-                $data = null;
-                if ($responseBody instanceof ArrayableInterface) {
-                    $data = $responseBody->toArray();
-                }
-                $response = $this->responders[$request->getHeaderLine('Accept')]->respond($this->getResponseDefaultStatusCode(), $data);
-                break;
+                $responder = $this->responders[$request->getHeaderLine('Accept')];
             }
         }
 
-        return $response;
+        if(!$responder) {
+            throw new NoResponderAvailableForAcceptHeaderException();
+        }
+
+        return $responder;
     }
 
+    /**
+     * @param ServerRequestInterface $request
+     * @return mixed[]|null
+     */
+    public function getResponseBodyData(ServerRequestInterface $request): ?array
+    {
+        $responseBody = $this->execute($request);
+        $data = null;
+        if ($responseBody instanceof ArrayableInterface) {
+            $data = $responseBody->toArray();
+        }
+        return $data;
+    }
+
+    /**
+     * @throws BadRequestException
+     */
     protected function body(ServerRequestInterface $request, string $path): StandardField
     {
         return $this->getFromBodyRequestByPath($request, $path);
     }
 
+    /**
+     * @throws BadRequestException
+     */
     private function getFromBodyRequestByPath(ServerRequestInterface $request, string $path): StandardField
     {
         $body = $request->getBody();
@@ -70,7 +111,7 @@ abstract readonly class Endpoint implements EndpointInterface
         $body = json_decode($body->getContents(), true);
 
         if (!is_array($body)) {
-            throw new \Exception("Cannot retrieve body");
+            throw new BadRequestException(["body" => "Body is null or is not a valid json"]);
         }
 
         return new StandardField($this->retrieveArrayValueByPathService->find($path, $body));
