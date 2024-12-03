@@ -7,6 +7,7 @@ use MongoDB\Client;
 use Psr\Log\LoggerInterface;
 use SaaSFormation\Framework\Contracts\Application\ReadModel\ReadModel;
 use SaaSFormation\Framework\Contracts\Application\ReadModel\ReadModelRepositoryInterface;
+use SaaSFormation\Framework\Contracts\Application\ReadModel\RepositoryCollectionResult;
 use SaaSFormation\Framework\Contracts\Common\Identity\UUIDFactoryInterface;
 
 readonly abstract class MongoDBBasedReadModelRepository implements ReadModelRepositoryInterface
@@ -41,21 +42,26 @@ readonly abstract class MongoDBBasedReadModelRepository implements ReadModelRepo
     public function findOneByCriteria(array $criteria): ?ReadModel
     {
         $this->logger->debug("Trying to find one read model", ['criteria' => $criteria]);
-        $readModels = $this->findByCriteria($criteria);
+        $result = $this->findByCriteria($criteria);
 
-        if(count($readModels) === 0) {
+        if($result->totalResultsRetrieved === 0) {
             $this->logger->warning("Read model not found", ['criteria' => $criteria]);
             throw new \Exception("No results found for the given criteria.");
         }
 
-        $this->logger->debug("One read model found", ['code' => $readModels[0]->code(), 'criteria' => $criteria]);
-        return $readModels[0];
+        $this->logger->debug("One read model found", ['code' => $result->readModels[0]->code(), 'criteria' => $criteria]);
+        return $result->readModels[0];
     }
 
-    public function findByCriteria(array $criteria): array
+    public function findByCriteria(array $criteria): RepositoryCollectionResult
     {
         $this->logger->debug("Trying to find read models", ['criteria' => $criteria]);
         $readModels = [];
+
+        $totalResults = $this->client
+            ->selectDatabase($this->databaseName())
+            ->selectCollection($this->collectionName())
+            ->countDocuments();
 
         $results = $this->client
             ->selectDatabase($this->databaseName())
@@ -69,7 +75,8 @@ readonly abstract class MongoDBBasedReadModelRepository implements ReadModelRepo
         }
 
         $this->logger->debug("Read models found", ['total' => count($readModels), 'criteria' => $criteria]);
-        return $readModels;
+
+        return new RepositoryCollectionResult($totalResults, $readModels);
     }
 
     public abstract function databaseName(): string;
