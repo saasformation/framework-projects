@@ -31,6 +31,8 @@ services:
       $formatter: '@SaaSFormation\Framework\Projects\Infrastructure\Bus\TacticianQueryBusLogFormatter'
       $logger: '@default_logger'
 
+  SaaSFormation\Framework\Projects\Infrastructure\Bus\TacticianBasedQueryBusHandlerNameInflector:
+
   League\Tactician\Handler\MethodNameInflector\HandleInflector:
 
   League\Tactician\Handler\CommandNameExtractor\ClassNameExtractor:
@@ -57,12 +59,12 @@ services:
       $handlerLocator: '@SaaSFormation\Framework\Projects\Infrastructure\Bus\TacticianCommandBusInterfaceBasedHandlerLocator'
       $methodNameInflector: '@League\Tactician\Handler\MethodNameInflector\HandleInflector'
 
-  tactician_querybus_command_handler_middleware:
+  tactician_querybus_query_handler_middleware:
     class: League\Tactician\Handler\CommandHandlerMiddleware
     arguments:
       $commandNameExtractor: '@League\Tactician\Handler\CommandNameExtractor\ClassNameExtractor'
       $handlerLocator: '@SaaSFormation\Framework\Projects\Infrastructure\Bus\TacticianQueryBusInterfaceBasedHandlerLocator'
-      $methodNameInflector: '@League\Tactician\Handler\MethodNameInflector\HandleInflector'
+      $methodNameInflector: '@SaaSFormation\Framework\Projects\Infrastructure\Bus\TacticianBasedQueryBusHandlerNameInflector'
 
   tactician_command_bus:
     class: League\Tactician\CommandBus
@@ -76,7 +78,7 @@ services:
     arguments:
       -
         - '@tactician_querybus_logger_middleware'
-        - '@tactician_querybus_command_handler_middleware'
+        - '@tactician_querybus_query_handler_middleware'
 
   SaaSFormation\Framework\Projects\Infrastructure\Bus\TacticianBasedCommandBus:
     arguments:
