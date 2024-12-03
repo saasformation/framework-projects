@@ -66,12 +66,15 @@ readonly abstract class MongoDBBasedReadModelRepository implements ReadModelRepo
         $results = $this->client
             ->selectDatabase($this->databaseName())
             ->selectCollection($this->collectionName())
-            ->find($criteria)
-            ->toArray();
+            ->find($criteria);
 
-        foreach ($results as $result) {
+        $results->setTypeMap(['root' => 'array', 'document' => 'array', 'array' => 'array']);
+
+        $items = $results->toArray();
+
+        foreach ($items as $result) {
             $className = $this->readModelClass();
-            $readModels[] = $className::fromArray($result->toArray()['_id'], $result->toArray()['data']);
+            $readModels[] = $className::fromArray($result['_id'], $result['data']);
         }
 
         $this->logger->debug("Read models found", ['total' => count($readModels), 'criteria' => $criteria]);
