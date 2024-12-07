@@ -33,9 +33,9 @@ class SymfonyContainerProvider implements ContainerProviderInterface
         $container->setDefinition(KernelInterface::class, (new Definition(KernelInterface::class, []))->setSynthetic(true)->setPublic(true));
         $container->setDefinition(EnvVarsManagerInterface::class, (new Definition(EnvVarsManagerInterface::class, []))->setSynthetic(true)->setPublic(true));
         $container->setDefinition(Logger::class, (new Definition(Logger::class, []))->setSynthetic(true)->setPublic(true));
-        $container->setAlias(LoggerInterface::class, Logger::class);
-        $container->setAlias('default_logger', LoggerInterface::class);
-        $container->setAlias('default_env_vars_manager', EnvVarsManagerInterface::class);
+        $container->setAlias(LoggerInterface::class, Logger::class)->setPublic(true);
+        $container->setAlias('default_logger', LoggerInterface::class)->setPublic(true);
+        $container->setAlias('default_env_vars_manager', EnvVarsManagerInterface::class)->setPublic(true);
 
         $container->compile();
 
