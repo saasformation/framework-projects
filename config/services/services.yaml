@@ -4,10 +4,6 @@ services:
     arguments:
       $envVarsManager: '@default_env_vars_manager'
 
-  SaaSFormation\Framework\Projects\Infrastructure\KurrentClientProvider:
-    arguments:
-      $envVarsManager: '@default_env_vars_manager'
-
   SaaSFormation\Framework\Projects\Infrastructure\Bus\TacticianCommandBusLogFormatter:
 
   SaaSFormation\Framework\Projects\Infrastructure\Bus\TacticianQueryBusLogFormatter:
@@ -104,12 +100,6 @@ services:
     arguments:
       $mongoDBClientProvider: '@SaaSFormation\Framework\Projects\Infrastructure\ReadModel\MongoDBClientProvider'
       $logger: '@default_logger'
-
-  SaaSFormation\Framework\Projects\Infrastructure\KurrentBasedWriteModelRepository:
-    arguments:
-      $kurrentClientProvider: '@SaaSFormation\Framework\Projects\Infrastructure\KurrentClientProvider'
-      $logger: '@default_logger'
-      $uuidFactory: '@SaaSFormation\Framework\Contracts\Common\Identity\UUIDFactoryInterface'
 
   SaaSFormation\Framework\Contracts\Application\Bus\CommandBusInterface:
     public: true
