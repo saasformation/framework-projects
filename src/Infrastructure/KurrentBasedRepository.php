@@ -9,9 +9,9 @@ use SaaSFormation\Framework\Contracts\Common\Identity\UUIDFactoryInterface;
 use SaaSFormation\Framework\Contracts\Domain\Aggregate;
 use SaaSFormation\Framework\Contracts\Domain\DomainEvent;
 use SaaSFormation\Framework\Contracts\Domain\DomainEventStream;
-use SaaSFormation\Framework\Contracts\Domain\WriteModelRepositoryInterface;
+use SaaSFormation\Framework\Contracts\Domain\WriteModel\RepositoryInterface;
 
-readonly class KurrentBasedWriteModelRepository implements WriteModelRepositoryInterface
+readonly class KurrentBasedRepository implements RepositoryInterface
 {
     private Client $client;
 
