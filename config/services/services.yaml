@@ -1,9 +1,4 @@
 services:
-  SaaSFormation\Framework\Projects\Infrastructure\ReadModel\MongoDBClientProvider:
-    public: true
-    arguments:
-      $envVarsManager: '@default_env_vars_manager'
-
   SaaSFormation\Framework\Projects\Infrastructure\Bus\TacticianCommandBusLogFormatter:
 
   SaaSFormation\Framework\Projects\Infrastructure\Bus\TacticianQueryBusLogFormatter:
@@ -95,11 +90,6 @@ services:
         application/json: '@SaaSFormation\Framework\Projects\UI\API\HTTP\ReactPHPBasedJSONResponder'
 
   SaaSFormation\Framework\Projects\Infrastructure\Identity\RamseyBasedUUIDFactory:
-
-  SaaSFormation\Framework\Projects\Infrastructure\ReadModel\MongoDBBasedReadModelRepository:
-    arguments:
-      $mongoDBClientProvider: '@SaaSFormation\Framework\Projects\Infrastructure\ReadModel\MongoDBClientProvider'
-      $logger: '@default_logger'
 
   SaaSFormation\Framework\Contracts\Application\Bus\CommandBusInterface:
     public: true
