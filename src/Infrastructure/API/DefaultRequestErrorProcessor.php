@@ -7,7 +7,7 @@ use Psr\Http\Message\ServerRequestInterface;
 use Psr\Log\LoggerInterface;
 use React\Http\Message\Response;
 use SaaSFormation\Framework\Contracts\Infrastructure\API\RequestErrorProcessorInterface;
-use SaaSFormation\Framework\Contracts\UI\HTTP\StatusEnum;
+use SaaSFormation\Framework\SharedKernel\UI\HTTP\StatusEnum;
 
 readonly class DefaultRequestErrorProcessor implements RequestErrorProcessorInterface
 {

@@ -8,18 +8,18 @@ use Psr\Log\LoggerInterface;
 use ReflectionMethod;
 use SaaSFormation\ArrayByPath\RetrieveArrayValueByPathService;
 use SaaSFormation\Field\StandardField;
-use SaaSFormation\Framework\Contracts\Application\Bus\CommandBusInterface;
-use SaaSFormation\Framework\Contracts\Application\Bus\QueryBusInterface;
-use SaaSFormation\Framework\Contracts\Domain\DuplicatedAggregateException;
-use SaaSFormation\Framework\Contracts\UI\HTTP\ArrayableInterface;
-use SaaSFormation\Framework\Contracts\UI\HTTP\BadRequestException;
-use SaaSFormation\Framework\Contracts\UI\HTTP\EndpointInterface;
-use SaaSFormation\Framework\Contracts\UI\HTTP\NoResponderAvailableForAcceptHeaderException;
-use SaaSFormation\Framework\Contracts\UI\HTTP\ResponderInterface;
-use SaaSFormation\Framework\Contracts\UI\HTTP\StatusEnum;
+use SaaSFormation\Framework\MessageBus\Application\CommandBusInterface;
+use SaaSFormation\Framework\MessageBus\Application\QueryBusInterface;
 use SaaSFormation\Framework\Projects\UI\API\HTTP\Attributes\StatusCode;
+use SaaSFormation\Framework\SharedKernel\Domain\DuplicatedAggregateException;
+use SaaSFormation\Framework\SharedKernel\UI\HTTP\BadRequestException;
+use SaaSFormation\Framework\SharedKernel\UI\HTTP\EndpointInterface;
+use SaaSFormation\Framework\SharedKernel\UI\HTTP\NoResponderAvailableForAcceptHeaderException;
+use SaaSFormation\Framework\SharedKernel\UI\HTTP\NotEmptyResponseBodyInterface;
+use SaaSFormation\Framework\SharedKernel\UI\HTTP\ResponderInterface;
+use SaaSFormation\Framework\SharedKernel\UI\HTTP\StatusEnum;
 
-abstract readonly class Endpoint implements EndpointInterface
+abstract readonly class AbstractEndpoint implements EndpointInterface
 {
     /**
      * @param string $defaultResponseContentType
@@ -87,7 +87,7 @@ abstract readonly class Endpoint implements EndpointInterface
     {
         $responseBody = $this->execute($request);
         $data = null;
-        if ($responseBody instanceof ArrayableInterface) {
+        if ($responseBody instanceof NotEmptyResponseBodyInterface) {
             $data = $responseBody->toArray();
         }
         return $data;

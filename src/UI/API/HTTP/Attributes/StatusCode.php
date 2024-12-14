@@ -3,7 +3,7 @@
 namespace SaaSFormation\Framework\Projects\UI\API\HTTP\Attributes;
 
 use Attribute;
-use SaaSFormation\Framework\Contracts\UI\HTTP\StatusEnum;
+use SaaSFormation\Framework\SharedKernel\UI\HTTP\StatusEnum;
 
 #[Attribute]
 class StatusCode

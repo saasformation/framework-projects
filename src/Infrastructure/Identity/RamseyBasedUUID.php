@@ -2,8 +2,8 @@
 
 namespace SaaSFormation\Framework\Projects\Infrastructure\Identity;
 
-use SaaSFormation\Framework\Contracts\Common\Identity\UUIDInterface;
 use Ramsey\Uuid\UuidInterface as RamseyUuidInterface;
+use SaaSFormation\Framework\SharedKernel\Common\Identity\UUIDInterface;
 
 readonly class RamseyBasedUUID implements UUIDInterface
 {

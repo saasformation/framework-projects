@@ -4,8 +4,8 @@ namespace SaaSFormation\Framework\Projects\UI\API\HTTP;
 
 use Psr\Http\Message\ResponseInterface;
 use React\Http\Message\Response;
-use SaaSFormation\Framework\Contracts\UI\HTTP\ResponderInterface;
-use SaaSFormation\Framework\Contracts\UI\HTTP\StatusEnum;
+use SaaSFormation\Framework\SharedKernel\UI\HTTP\ResponderInterface;
+use SaaSFormation\Framework\SharedKernel\UI\HTTP\StatusEnum;
 
 class ReactPHPBasedJSONResponder implements ResponderInterface
 {

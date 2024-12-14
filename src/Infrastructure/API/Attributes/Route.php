@@ -3,7 +3,7 @@
 namespace SaaSFormation\Framework\Projects\Infrastructure\API\Attributes;
 
 use Attribute;
-use SaaSFormation\Framework\Contracts\UI\HTTP\MethodEnum;
+use SaaSFormation\Framework\SharedKernel\UI\HTTP\MethodEnum;
 
 #[Attribute]
 class Route

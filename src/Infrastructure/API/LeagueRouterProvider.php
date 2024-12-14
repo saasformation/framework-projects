@@ -7,9 +7,9 @@ use League\Route\Strategy\ApplicationStrategy;
 use Psr\Container\ContainerInterface;
 use SaaSFormation\Framework\Contracts\Infrastructure\API\RouterInterface;
 use SaaSFormation\Framework\Contracts\Infrastructure\API\RouterProviderInterface;
-use SaaSFormation\Framework\Contracts\UI\HTTP\EndpointInterface;
-use SaaSFormation\Framework\Contracts\UI\HTTP\MethodEnum;
 use SaaSFormation\Framework\Projects\Infrastructure\API\Attributes\Route;
+use SaaSFormation\Framework\SharedKernel\UI\HTTP\EndpointInterface;
+use SaaSFormation\Framework\SharedKernel\UI\HTTP\MethodEnum;
 
 class LeagueRouterProvider implements RouterProviderInterface
 {

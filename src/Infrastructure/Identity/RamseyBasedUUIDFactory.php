@@ -3,8 +3,8 @@
 namespace SaaSFormation\Framework\Projects\Infrastructure\Identity;
 
 use Ramsey\Uuid\Uuid;
-use SaaSFormation\Framework\Contracts\Common\Identity\UUIDFactoryInterface;
-use SaaSFormation\Framework\Contracts\Common\Identity\UUIDInterface;
+use SaaSFormation\Framework\SharedKernel\Common\Identity\UUIDFactoryInterface;
+use SaaSFormation\Framework\SharedKernel\Common\Identity\UUIDInterface;
 
 class RamseyBasedUUIDFactory implements UuidFactoryInterface
 {

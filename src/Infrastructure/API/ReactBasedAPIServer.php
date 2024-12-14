@@ -33,7 +33,7 @@ readonly class ReactBasedAPIServer implements APIServerInterface
         }
 
         if(!$requestProcessor) {
-            $requestProcessor = new DefaultRequestProcessor($this->router, $requestErrorProcessor);
+            $requestProcessor = new DefaultRequestProcessor($this->router, $requestErrorProcessor, $this->kernel);
         }
 
         $loop = Loop::get();
