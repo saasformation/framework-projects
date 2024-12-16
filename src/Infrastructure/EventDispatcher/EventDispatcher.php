@@ -7,6 +7,7 @@ use Psr\Log\LoggerInterface;
 use SaaSFormation\Framework\SharedKernel\Application\EventDispatcher\EventDispatcherInterface;
 use SaaSFormation\Framework\SharedKernel\Application\EventDispatcher\ListenerInterface;
 use SaaSFormation\Framework\SharedKernel\Domain\Messages\AbstractDomainEvent;
+use SaaSFormation\Framework\SharedKernel\Domain\Messages\DomainEventInterface;
 
 class EventDispatcher implements EventDispatcherInterface
 {
@@ -60,10 +61,10 @@ class EventDispatcher implements EventDispatcherInterface
         }
     }
 
-    public function dispatch(AbstractDomainEvent $event): void
+    public function dispatch(DomainEventInterface $event): void
     {
-        if(isset($this->map[$event->domainEventCode()])) {
-            foreach($this->map[$event->domainEventCode()] as $handler) {
+        if(isset($this->map[$event->getDomainEventCode()])) {
+            foreach($this->map[$event->getDomainEventCode()] as $handler) {
                 $handler->listen($event);
             }
         }

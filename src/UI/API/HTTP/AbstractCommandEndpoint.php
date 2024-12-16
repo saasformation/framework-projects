@@ -19,9 +19,9 @@ abstract readonly class AbstractCommandEndpoint extends AbstractEndpoint
         Assert::that($correlationId)->isInstanceOf(IdInterface::class);
         Assert::that($executorId)->isInstanceOf(IdInterface::class);
 
-        $command->requestId = $requestId;
-        $command->correlationId = $correlationId;
-        $command->executorId = $executorId;
+        $command->setRequestId($requestId);
+        $command->setCorrelationId($correlationId);
+        $command->setExecutorId($executorId);
         $this->commandBus->handle($command);
     }
 }
