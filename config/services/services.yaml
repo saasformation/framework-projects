@@ -78,7 +78,7 @@ services:
 
   SaaSFormation\ArrayByPath\RetrieveArrayValueByPathService:
 
-  SaaSFormation\Framework\Projects\UI\API\HTTP\Endpoint:
+  SaaSFormation\Framework\Projects\UI\API\HTTP\AbstractEndpoint:
     public: true
     arguments:
       $defaultResponseContentType: "application/json"
