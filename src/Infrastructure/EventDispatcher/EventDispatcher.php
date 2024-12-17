@@ -39,7 +39,7 @@ class EventDispatcher implements EventDispatcherInterface
                                     if(class_exists($type->getName())) {
                                         $reflectedType = new \ReflectionClass($type->getName());
                                         if($reflectedType->getParentClass() && $reflectedType->getParentClass()->getName() === AbstractDomainEvent::class) {
-                                            $code = $type->getName()::domainEventCode();
+                                            $code = $type->getName()::getDomainEventCode();
                                             if(is_string($code)) {
                                                 $this->map[$code][] = $service;
                                                 $this->logger->debug("Event handler $class for event with code $code has been registered");
