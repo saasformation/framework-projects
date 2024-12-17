@@ -46,7 +46,7 @@ class EventDispatcher implements EventDispatcherInterface
                                             }
                                         }
                                     } else {
-                                        throw new \Exception("Event type not found");
+                                        throw new \Exception("Event type not found: " . $type->getName());
                                     }
                                 }
                             }
