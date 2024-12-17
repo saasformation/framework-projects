@@ -44,6 +44,7 @@ services:
       $commandNameExtractor: '@League\Tactician\Handler\CommandNameExtractor\ClassNameExtractor'
       $handlerLocator: '@SaaSFormation\Framework\MessageBus\Infrastructure\TacticianCommandBusInterfaceBasedHandlerLocator'
       $methodNameInflector: '@League\Tactician\Handler\MethodNameInflector\HandleInflector'
+      $repository: '@SaaSFormation\Framework\SharedKernel\Domain\WriteModel\RepositoryInterface'
 
   tactician_querybus_query_handler_middleware:
     class: League\Tactician\Handler\CommandHandlerMiddleware
