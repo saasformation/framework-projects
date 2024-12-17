@@ -35,7 +35,7 @@ class EventDispatcher implements EventDispatcherInterface
                         if($event->getType() instanceof \ReflectionUnionType || $event->getType() instanceof \ReflectionIntersectionType) {
                             $types = $event->getType()->getTypes();
                             foreach($types as $type) {
-                                if($type instanceof \ReflectionNamedType && $type->getName() !== AbstractDomainEvent::class) {
+                                if($type instanceof \ReflectionNamedType && !in_array($type->getName(), [AbstractDomainEvent::class, DomainEventInterface::class])) {
                                     if(class_exists($type->getName())) {
                                         $reflectedType = new \ReflectionClass($type->getName());
                                         if($reflectedType->getParentClass() && $reflectedType->getParentClass()->getName() === AbstractDomainEvent::class) {
