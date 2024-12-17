@@ -91,10 +91,10 @@ services:
 
   SaaSFormation\Framework\Projects\Infrastructure\Identity\RamseyBasedUUIDFactory:
 
-  SaaSFormation\Framework\Contracts\Application\Bus\CommandBusInterface:
+  SaaSFormation\Framework\MessageBus\Application\CommandBusInterface:
     public: true
     alias: 'SaaSFormation\Framework\MessageBus\Infrastructure\TacticianBasedCommandBus'
-  SaaSFormation\Framework\Contracts\Application\Bus\QueryBusInterface:
+  SaaSFormation\Framework\MessageBus\Application\QueryBusInterface:
     public: true
     alias: 'SaaSFormation\Framework\MessageBus\Infrastructure\TacticianBasedQueryBus'
   SaaSFormation\Framework\Contracts\Common\Identity\UUIDFactoryInterface:
