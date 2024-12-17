@@ -97,6 +97,6 @@ services:
   SaaSFormation\Framework\MessageBus\Application\QueryBusInterface:
     public: true
     alias: 'SaaSFormation\Framework\MessageBus\Infrastructure\TacticianBasedQueryBus'
-  SaaSFormation\Framework\Contracts\Common\Identity\UUIDFactoryInterface:
+  SaaSFormation\Framework\SharedKernel\Common\Identity\UUIDFactoryInterface:
     alias: 'SaaSFormation\Framework\Projects\Infrastructure\Identity\RamseyBasedUUIDFactory'
     public: true
