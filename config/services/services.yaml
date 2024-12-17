@@ -1,23 +1,23 @@
 services:
-  SaaSFormation\Framework\Projects\Infrastructure\Bus\TacticianCommandBusLogFormatter:
+  SaaSFormation\Framework\MessageBus\Infrastructure\TacticianCommandBusLogFormatter:
 
-  SaaSFormation\Framework\Projects\Infrastructure\Bus\TacticianQueryBusLogFormatter:
+  SaaSFormation\Framework\MessageBus\Infrastructure\TacticianQueryBusLogFormatter:
 
-  SaaSFormation\Framework\Projects\Infrastructure\Bus\TacticianEventBusLogFormatter:
+  SaaSFormation\Framework\MessageBus\Infrastructure\TacticianEventBusLogFormatter:
 
   tactician_commandbus_logger_middleware:
     class: League\Tactician\Logger\LoggerMiddleware
     arguments:
-      $formatter: '@SaaSFormation\Framework\Projects\Infrastructure\Bus\TacticianCommandBusLogFormatter'
+      $formatter: '@SaaSFormation\Framework\MessageBus\Infrastructure\TacticianCommandBusLogFormatter'
       $logger: '@default_logger'
 
   tactician_querybus_logger_middleware:
     class: League\Tactician\Logger\LoggerMiddleware
     arguments:
-      $formatter: '@SaaSFormation\Framework\Projects\Infrastructure\Bus\TacticianQueryBusLogFormatter'
+      $formatter: '@SaaSFormation\Framework\MessageBus\Infrastructure\TacticianQueryBusLogFormatter'
       $logger: '@default_logger'
 
-  SaaSFormation\Framework\Projects\Infrastructure\Bus\TacticianBasedQueryBusHandlerNameInflector:
+  SaaSFormation\Framework\MessageBus\Infrastructure\TacticianBasedQueryBusHandlerNameInflector:
 
   League\Tactician\Handler\MethodNameInflector\HandleInflector:
 
@@ -38,26 +38,26 @@ services:
       $container: '@service_container'
       $logger: '@default_logger'
 
-  SaaSFormation\Framework\Projects\Infrastructure\Bus\CommandBusSendEventsToEventStreamMiddleware:
+  SaaSFormation\Framework\MessageBus\Infrastructure\CommandBusSendEventsToEventStreamMiddleware:
     arguments:
       $eventDispatcher: '@SaaSFormation\Framework\Projects\Infrastructure\EventDispatcher\EventDispatcher'
       $commandNameExtractor: '@League\Tactician\Handler\CommandNameExtractor\ClassNameExtractor'
-      $handlerLocator: '@SaaSFormation\Framework\Projects\Infrastructure\Bus\TacticianCommandBusInterfaceBasedHandlerLocator'
+      $handlerLocator: '@SaaSFormation\Framework\MessageBus\Infrastructure\TacticianCommandBusInterfaceBasedHandlerLocator'
       $methodNameInflector: '@League\Tactician\Handler\MethodNameInflector\HandleInflector'
 
   tactician_querybus_query_handler_middleware:
     class: League\Tactician\Handler\CommandHandlerMiddleware
     arguments:
       $commandNameExtractor: '@League\Tactician\Handler\CommandNameExtractor\ClassNameExtractor'
-      $handlerLocator: '@SaaSFormation\Framework\Projects\Infrastructure\Bus\TacticianQueryBusInterfaceBasedHandlerLocator'
-      $methodNameInflector: '@SaaSFormation\Framework\Projects\Infrastructure\Bus\TacticianBasedQueryBusHandlerNameInflector'
+      $handlerLocator: '@SaaSFormation\Framework\MessageBus\Infrastructure\TacticianQueryBusInterfaceBasedHandlerLocator'
+      $methodNameInflector: '@SaaSFormation\Framework\MessageBus\Infrastructure\TacticianBasedQueryBusHandlerNameInflector'
 
   tactician_command_bus:
     class: League\Tactician\CommandBus
     arguments:
       -
         - '@tactician_commandbus_logger_middleware'
-        - '@SaaSFormation\Framework\Projects\Infrastructure\Bus\CommandBusSendEventsToEventStreamMiddleware'
+        - '@SaaSFormation\Framework\MessageBus\Infrastructure\CommandBusSendEventsToEventStreamMiddleware'
 
   tactician_query_bus:
     class: League\Tactician\CommandBus
@@ -66,11 +66,11 @@ services:
         - '@tactician_querybus_logger_middleware'
         - '@tactician_querybus_query_handler_middleware'
 
-  SaaSFormation\Framework\Projects\Infrastructure\Bus\TacticianBasedCommandBus:
+  SaaSFormation\Framework\MessageBus\Infrastructure\TacticianBasedCommandBus:
     arguments:
       - '@tactician_command_bus'
 
-  SaaSFormation\Framework\Projects\Infrastructure\Bus\TacticianBasedQueryBus:
+  SaaSFormation\Framework\MessageBus\Infrastructure\TacticianBasedQueryBus:
     arguments:
       - '@tactician_query_bus'
 
@@ -83,8 +83,8 @@ services:
     arguments:
       $defaultResponseContentType: "application/json"
       $logger: '@default_logger'
-      $commandBus: '@SaaSFormation\Framework\Projects\Infrastructure\Bus\TacticianBasedCommandBus'
-      $queryBus: '@SaaSFormation\Framework\Projects\Infrastructure\Bus\TacticianBasedQueryBus'
+      $commandBus: '@SaaSFormation\Framework\MessageBus\Infrastructure\TacticianBasedCommandBus'
+      $queryBus: '@SaaSFormation\Framework\MessageBus\Infrastructure\TacticianBasedQueryBus'
       $retrieveArrayValueByPathService: '@SaaSFormation\ArrayByPath\RetrieveArrayValueByPathService'
       $responders:
         application/json: '@SaaSFormation\Framework\Projects\UI\API\HTTP\ReactPHPBasedJSONResponder'
@@ -93,10 +93,10 @@ services:
 
   SaaSFormation\Framework\Contracts\Application\Bus\CommandBusInterface:
     public: true
-    alias: 'SaaSFormation\Framework\Projects\Infrastructure\Bus\TacticianBasedCommandBus'
+    alias: 'SaaSFormation\Framework\MessageBus\Infrastructure\TacticianBasedCommandBus'
   SaaSFormation\Framework\Contracts\Application\Bus\QueryBusInterface:
     public: true
-    alias: 'SaaSFormation\Framework\Projects\Infrastructure\Bus\TacticianBasedQueryBus'
+    alias: 'SaaSFormation\Framework\MessageBus\Infrastructure\TacticianBasedQueryBus'
   SaaSFormation\Framework\Contracts\Common\Identity\UUIDFactoryInterface:
     alias: 'SaaSFormation\Framework\Projects\Infrastructure\Identity\RamseyBasedUUIDFactory'
     public: true
