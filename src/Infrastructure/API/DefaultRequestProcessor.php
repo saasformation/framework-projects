@@ -36,9 +36,9 @@ readonly class DefaultRequestProcessor implements RequestProcessorInterface
             }
             $executorId = $uuidFactory->generate();
 
-            $request->withAttribute('request_id', $requestId);
-            $request->withAttribute('correlation_id', $correlationId);
-            $request->withAttribute('executor_id', $executorId);
+            $request = $request->withAttribute('request_id', $requestId)
+                ->withAttribute('correlation_id', $correlationId)
+                ->withAttribute('executor_id', $executorId);
 
             return $this->router->route($request);
         } catch(MethodNotAllowedException) {
