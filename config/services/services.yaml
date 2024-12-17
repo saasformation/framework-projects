@@ -45,6 +45,7 @@ services:
       $handlerLocator: '@SaaSFormation\Framework\MessageBus\Infrastructure\TacticianCommandBusInterfaceBasedHandlerLocator'
       $methodNameInflector: '@League\Tactician\Handler\MethodNameInflector\HandleInflector'
       $repository: '@SaaSFormation\Framework\SharedKernel\Domain\WriteModel\RepositoryInterface'
+      $UUIDFactory: '@SaaSFormation\Framework\SharedKernel\Common\Identity\UUIDFactoryInterface'
 
   tactician_querybus_query_handler_middleware:
     class: League\Tactician\Handler\CommandHandlerMiddleware
