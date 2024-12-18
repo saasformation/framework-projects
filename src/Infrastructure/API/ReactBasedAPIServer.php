@@ -36,11 +36,9 @@ readonly class ReactBasedAPIServer implements APIServerInterface
         }
 
         if(!$requestProcessor) {
-            $envVarsManager = $this->kernel->container()->get(EnvVarsManagerInterface::class);
-            Assert::that($envVarsManager)->isInstanceOf(EnvVarsManagerInterface::class);
-            $mongoDBClientProvider = new MongoDBClientProvider($envVarsManager);
-            $mongoDBClient = ($mongoDBClientProvider)->provide();
-            $requestProcessor = new DefaultRequestProcessor($this->router, $requestErrorProcessor, $this->kernel, $mongoDBClient);
+            $mongoDBClientProvider = $this->kernel->container()->get(MongoDBClientProvider::class);
+            Assert::that($mongoDBClientProvider)->isInstanceOf(MongoDBClientProvider::class);
+            $requestProcessor = new DefaultRequestProcessor($this->router, $requestErrorProcessor, $this->kernel, ($mongoDBClientProvider)->provide());
         }
 
         $loop = Loop::get();
