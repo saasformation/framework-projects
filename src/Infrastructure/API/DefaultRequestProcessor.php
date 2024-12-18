@@ -12,12 +12,18 @@ use SaaSFormation\Framework\Contracts\Infrastructure\API\RequestErrorProcessorIn
 use SaaSFormation\Framework\Contracts\Infrastructure\API\RequestProcessorInterface;
 use SaaSFormation\Framework\Contracts\Infrastructure\API\RouterInterface;
 use SaaSFormation\Framework\Contracts\Infrastructure\KernelInterface;
+use SaaSFormation\Framework\MongoDBBasedReadModel\Infrastructure\ReadModel\MongoDBClient;
 use SaaSFormation\Framework\SharedKernel\Common\Identity\UUIDFactoryInterface;
 use SaaSFormation\Framework\SharedKernel\UI\HTTP\StatusEnum;
 
 readonly class DefaultRequestProcessor implements RequestProcessorInterface
 {
-    public function __construct(private RouterInterface $router, private RequestErrorProcessorInterface $requestErrorProcessor, private KernelInterface $kernel)
+    public function __construct(
+        private RouterInterface                $router,
+        private RequestErrorProcessorInterface $requestErrorProcessor,
+        private KernelInterface                $kernel,
+        private MongoDBClient                  $mongoDBClient
+    )
     {
     }
 
@@ -27,9 +33,14 @@ readonly class DefaultRequestProcessor implements RequestProcessorInterface
             $uuidFactory = $this->kernel->container()->get(UUIDFactoryInterface::class);
             Assert::that($uuidFactory)->isInstanceOf(UUIDFactoryInterface::class);
 
-            $requestId = $uuidFactory->generate();
+            $requestId = $request->getHeaderLine('request-id');
+            if ($requestId) {
+                $requestId = $uuidFactory->fromString($requestId);
+            } else {
+                $requestId = $uuidFactory->generate();
+            }
             $correlationId = $request->getHeaderLine('correlation-id');
-            if($correlationId) {
+            if ($correlationId) {
                 $correlationId = $uuidFactory->fromString($correlationId);
             } else {
                 $correlationId = $uuidFactory->generate();
@@ -40,10 +51,21 @@ readonly class DefaultRequestProcessor implements RequestProcessorInterface
                 ->withAttribute('correlation_id', $correlationId)
                 ->withAttribute('executor_id', $executorId);
 
-            return $this->router->route($request);
-        } catch(MethodNotAllowedException) {
+            $this->mongoDBClient->startSession($requestId);
+
+            try {
+                $route = $this->router->route($request);
+            } catch (\Throwable $e) {
+                $this->mongoDBClient->endSession($requestId);
+                throw $e;
+            }
+
+            $this->mongoDBClient->endSession($requestId);
+
+            return $route;
+        } catch (MethodNotAllowedException) {
             return Response::json(null)->withStatus(StatusEnum::HTTP_METHOD_NOT_ALLOWED->value);
-        } catch(NotFoundException) {
+        } catch (NotFoundException) {
             return Response::json(null)->withStatus(StatusEnum::HTTP_NOT_FOUND->value);
         } catch (\Throwable $e) {
             return $this->requestErrorProcessor->processError($request, $e);
