@@ -46,6 +46,7 @@ services:
       $methodNameInflector: '@League\Tactician\Handler\MethodNameInflector\HandleInflector'
       $repository: '@SaaSFormation\Framework\SharedKernel\Domain\WriteModel\RepositoryInterface'
       $UUIDFactory: '@SaaSFormation\Framework\SharedKernel\Common\Identity\UUIDFactoryInterface'
+      $mongoDBClientProvider: '@SaaSFormation\Framework\MongoDBBasedReadModel\Infrastructure\ReadModel\MongoDBClientProvider'
 
   tactician_querybus_query_handler_middleware:
     class: League\Tactician\Handler\CommandHandlerMiddleware
